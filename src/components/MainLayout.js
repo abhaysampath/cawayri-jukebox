@@ -6,8 +6,6 @@ import ContactForm from './ContactForm';
 import AboutWindow from './AboutWindow';
 
 export default function MainLayout({ 
-  phase, 
-  setPhase, 
   activeMenu, 
   setActiveMenu, 
   songIndex, 
@@ -15,7 +13,7 @@ export default function MainLayout({
 }) {
   return (
     <div className="video-bg-container">
-      <VideoBackground phase={phase} setPhase={setPhase} />
+      <VideoBackground />
       <div className="overlay">
         <Header activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
         {activeMenu === 'About' && <AboutWindow />}
