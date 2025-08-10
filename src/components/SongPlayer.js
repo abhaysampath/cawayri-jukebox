@@ -1,71 +1,122 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Howl } from 'howler';
-import SongManager from './SongManager';
+import { Howl, Howler } from 'howler';
+import SongConfig from '../config/songConfig';
 import MoodManager from './MoodManager';
+import MarqueeText from './MarqueeText';
+import '../css/song-player.css';
 
 export default function SongPlayer({ songIndex, setSongIndex }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const soundRef = useRef(null);
-  
-  const current = SongManager.songs[songIndex];
+  const current = SongConfig[songIndex];
 
-  // Initialize sound when song changes
+  const unlockAudio = async () => {
+    if (!audioUnlocked && Howler.ctx) {
+      try {
+        await Howler.ctx.resume();
+        setAudioUnlocked(true);
+      } catch (error) {
+        console.warn('Failed to unlock audio context:', error);
+      }
+    }
+  };
+
   useEffect(() => {
-    if (soundRef.current) soundRef.current.unload();
+    if (soundRef.current) {
+      soundRef.current.unload();
+    }
     
     soundRef.current = new Howl({
-      src: [current.src],
+      src: current.src,
       html5: true,
       volume: 1,
+      preload: true,
       onend: () => setIsPlaying(false),
+      onplayerror: () => setIsPlaying(false)
     });
     
     MoodManager.setMood(current.color);
     setProgress(0);
     
     return () => {
-      if (soundRef.current) soundRef.current.unload();
+      if (soundRef.current) {
+        soundRef.current.unload();
+      }
     };
   }, [current]);
-
-  // Handle play/pause and progress tracking
   useEffect(() => {
     if (!soundRef.current) return;
-    
+
     let interval;
     if (isPlaying) {
-      soundRef.current.play();
-      interval = setInterval(() => {
-        const seek = soundRef.current.seek();
-        setProgress((seek / soundRef.current.duration()) * 100);
-      }, 500);
+      const playPromise = soundRef.current.play();
+      
+      if (playPromise !== undefined) {
+        Promise.resolve(playPromise).then(() => {
+          interval = setInterval(() => {
+            const seek = soundRef.current.seek();
+            const duration = soundRef.current.duration();
+            if (typeof seek === 'number' && duration > 0) {
+              setProgress((seek / duration) * 100);
+            }
+          }, 500);
+        }).catch(() => {
+          setIsPlaying(false);
+        });
+      } else {
+        interval = setInterval(() => {
+          const seek = soundRef.current.seek();
+          const duration = soundRef.current.duration();
+          if (typeof seek === 'number' && duration > 0) {
+            setProgress((seek / duration) * 100);
+          }
+        }, 500);
+      }
     } else {
-      soundRef.current.pause();
+      if (soundRef.current) {
+        soundRef.current.pause();
+      }
       clearInterval(interval);
     }
-    
     return () => clearInterval(interval);
   }, [isPlaying]);
 
   const nextSong = () => {
-    setSongIndex((i) => (i + 1) % SongManager.songs.length);
+    setSongIndex((i) => (i + 1) % SongConfig.length);
     setIsPlaying(false);
   };
 
   const prevSong = () => {
-    setSongIndex((i) => i === 0 ? SongManager.songs.length - 1 : i - 1);
+    setSongIndex((i) => i === 0 ? SongConfig.length - 1 : i - 1);
     setIsPlaying(false);
   };
 
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
+  const togglePlayPause = async () => {
+    await unlockAudio();
+    
+    if (!isPlaying) {
+      if (Howler.ctx && Howler.ctx.state === 'suspended') {
+        try {
+          await Howler.ctx.resume();
+        } catch (error) {
+          console.warn('Failed to resume AudioContext:', error);
+          return;
+        }
+      }
+      setIsPlaying(true);
+    } else {
+      setIsPlaying(false);
+    }
   };
 
   return (
-    <div className="song-info">
-      <h3>{current.title}</h3>
-      <p>Cawayri</p>
+    <div className="song-player" onClick={unlockAudio}>
+      <MarqueeText text={current.scrollText} />
+      <h3 className="title-artist">
+        {current.title} – {current.artist || 'Cawayri'}
+      </h3>
       <div className="progress-bar">
         <div className="progress" style={{ width: `${progress}%` }} />
       </div>
@@ -76,6 +127,11 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
         </button>
         <button onClick={nextSong} className="control-btn">⏭</button>
       </div>
+      {!audioUnlocked && (
+        <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.5rem' }}>
+          Click to enable audio
+        </div>
+      )}
     </div>
   );
 }
