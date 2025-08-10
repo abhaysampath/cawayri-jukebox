@@ -85,6 +85,47 @@
   height: 85px;
   font-size: 2rem;
 }
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  color: rgba(255, 255, 255, 0.4); /* default gray */
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.icon-btn.active {
+  color: #ffcc00; /* match your player button color */
+  opacity: 1;
+}
+
+.icon-btn:hover {
+  opacity: 0.8;
+}
+
+.icon-btn:focus {
+  outline: none;
+}
+button[title] {
+  position: relative;
+}
+
+button[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 0.8em;
+  white-space: nowrap;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 999;
+}
+
 
 @media (max-width: 600px) {
   .song-info { width: 80%; }
