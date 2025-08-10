@@ -9,6 +9,9 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [isRepeating, setIsRepeating] = useState(false);
+
   const soundRef = useRef(null);
   const current = SongConfig[songIndex];
 
@@ -84,10 +87,30 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
   }, [isPlaying]);
 
   const nextSong = () => {
-    setSongIndex((i) => (i + 1) % SongConfig.length);
+    setSongIndex((prev) => {
+      if (isShuffling) {
+        let next;
+        do {
+          next = Math.floor(Math.random() * SongConfig.length);
+        } while (next === prev);
+        return next;
+      }
+      return (prev + 1) % SongConfig.length;
+    });
     setIsPlaying(false);
   };
-
+  useEffect(() => {
+    if (soundRef.current) {
+      soundRef.current.onend = () => {
+        if (isRepeating) {
+          soundRef.current.seek(0);
+          soundRef.current.play();
+        } else {
+          nextSong();
+        }
+      };
+    }
+  }, [isRepeating, isShuffling]);
   const prevSong = () => {
     setSongIndex((i) => i === 0 ? SongConfig.length - 1 : i - 1);
     setIsPlaying(false);
@@ -113,19 +136,33 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
 
   return (
     <div className="song-player" onClick={unlockAudio}>
-      <MarqueeText text={current.scrollText} />
       <h3 className="title-artist">
         {current.title} – {current.artist || 'Cawayri'}
       </h3>
       <div className="progress-bar">
         <div className="progress" style={{ width: `${progress}%` }} />
       </div>
+      <MarqueeText text={current.scrollText} />
       <div className="player-controls">
+        <button
+          className={`icon-btn ${isShuffling ? 'active' : ''}`}
+          onClick={() => setIsShuffling(!isShuffling)}
+          title="Shuffle"
+        >
+          🔀
+        </button>
         <button onClick={prevSong} className="control-btn">⏮</button>
         <button onClick={togglePlayPause} className="control-btn play-btn">
           {isPlaying ? '❚❚' : '▶'}
         </button>
         <button onClick={nextSong} className="control-btn">⏭</button>
+        <button
+          className={`icon-btn ${isRepeating ? 'active' : ''}`}
+          onClick={() => setIsRepeating(!isRepeating)}
+          title="Repeat"
+        >
+          🔁
+        </button>
       </div>
       {!audioUnlocked && (
         <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.5rem' }}>
