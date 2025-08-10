@@ -1,94 +1,92 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import videoConfig from '../config/videoConfig';
 
 export default function VideoBackground({ phase, setPhase }) {
   const videoRef = useRef(null);
   const preloadRef = useRef(null);
+  const [stepIndex, setStepIndex] = useState(1); 
+
+  const pickVideoForOrder = (order) => {
+    const candidates = videoConfig.filter(v => v.order === order);
+    if (candidates.length === 0) return null;
+    if (candidates.length === 1) return candidates[0];
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  };
+  const pickHoldVideo = () => {
+    const holds = videoConfig.filter(v => v.order === "HOLD");
+    return holds[Math.floor(Math.random() * holds.length)];
+  };
+
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    
+    let currentConfig;
+    if (stepIndex > Math.max(...videoConfig.map(v => typeof v.order === "number" ? v.order : 0))) {
+        // Sequence done — go to HOLD pool
+        currentConfig = pickHoldVideo();
+    } else {
+        currentConfig = pickVideoForOrder(stepIndex);
+    }
+
+    if (!currentConfig) return;
+    video.src = `/video/${currentConfig.file}`;
+    video.playbackRate = currentConfig.speed;
+    video.currentTime = currentConfig.startTime || 0;
+    video.loop = false;
+    // video.preload = "auto";
+
     const handleLoaded = () => {
-      video.play().catch((err) => console.warn("Play blocked:", err));
+        video.play().catch((err) => console.warn("Play blocked:", err));
     };
 
-    if (phase === 1) {
-      video.src = "/video/bg1.webm";
-      video.playbackRate = 1.2;
-      video.loop = false;
-      
-      if (preloadRef.current) {
-        preloadRef.current.src = "/video/bg2-1.webm";
-        preloadRef.current.load();
-      }
-      
-      const handleEnd = () => setPhase(2);
-      video.addEventListener("ended", handleEnd);
-      video.play();
+    let repeatCounter = 0;
 
-      return () => {
-        video.removeEventListener("ended", handleEnd);
-        video.removeEventListener("loadeddata", handleLoaded);
-      };
-    }
-    
-    if (phase === 2) {
-      video.src = "/video/bg2-1.webm";
-      video.playbackRate = 0.9;
-      video.loop = false;
-      
-      const handleEnd = () => {
-        video.currentTime = 7.2;
-        setPhase(3);
-      };
-      
-      video.addEventListener("ended", handleEnd);
-      video.addEventListener("loadeddata", handleLoaded);
-      
-      return () => {
-        video.removeEventListener("ended", handleEnd);
-        video.removeEventListener("loadeddata", handleLoaded);
-      };
-    }
-    
-    if (phase === 3) {
-      const loopStart = 7.2;
-      video.src = "/video/bg2-1.webm";
-      video.playbackRate = 1.0;
-      video.loop = false;
-
-      const handleTimeUpdate = () => {
-        if (video.currentTime >= video.duration) {
-          video.currentTime = loopStart;
+    const handleEnd = () => {
+        if (repeatCounter < currentConfig.repeat) {
+            repeatCounter++;
+            if (currentConfig.loopStart !== null) {
+            video.currentTime = currentConfig.loopStart;
+            } else {
+            video.currentTime = currentConfig.startTime || 0;
+            }
+            video.play();
+        } else {
+            // Advance to next step or HOLD
+            setStepIndex(prev => prev + 1);
         }
-      };
-
-      const handleLoadedForLoop = () => {
-        video.currentTime = loopStart;
-        video.play();
-      };
-      
-      video.addEventListener("timeupdate", handleTimeUpdate);
-      video.addEventListener("loadeddata", handleLoadedForLoop);
-
-      return () => {
-        video.removeEventListener("timeupdate", handleTimeUpdate);
-        video.removeEventListener("loadeddata", handleLoadedForLoop);
-      };
+    };      
+    video.addEventListener("loadeddata", handleLoaded);
+    video.addEventListener("ended", handleEnd);
+    if (preloadRef.current) {
+        let nextConfig;
+        if (stepIndex >= Math.max(...videoConfig.map(v => typeof v.order === "number" ? v.order : 0))) {
+            nextConfig = pickHoldVideo();
+        } else {
+            nextConfig = pickVideoForOrder(stepIndex + 1);
+        }
+        if (nextConfig) {
+            preloadRef.current.src = `/video/${nextConfig.file}`;
+            preloadRef.current.load();
+        }
     }
-  }, [phase, setPhase]);
+    return () => {
+      video.removeEventListener("loadeddata", handleLoaded);
+      video.removeEventListener("ended", handleEnd);
+    };
+}, [stepIndex]);
 
   return (
     <>
       <video
         ref={videoRef}
         className="bg-video"
-        autoPlay 
-        muted 
-        playsInline 
+        autoPlay
+        muted
+        playsInline
         preload="auto"
       />
-      <video ref={preloadRef} style={{ display: 'none' }} />
+      <video ref={preloadRef} style={{ display: 'none' }} preload="auto" />
     </>
   );
 }
