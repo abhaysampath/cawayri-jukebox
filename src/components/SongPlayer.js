@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Howl, Howler } from 'howler';
 import SongConfig from '../config/songConfig';
 import MoodManager from './MoodManager';
 import MarqueeText from './MarqueeText';
 import '../css/song-player.css';
 
-export default function SongPlayer({ songIndex, setSongIndex }) {
+export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
 
   const soundRef = useRef(null);
   const current = SongConfig[songIndex];
@@ -51,31 +52,26 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
   }, [current]);
   useEffect(() => {
     if (!soundRef.current) return;
-
     let interval;
     if (isPlaying) {
       const playPromise = soundRef.current.play();
-      
+      const update = () => {
+        const seek = soundRef.current.seek();
+        const duration = soundRef.current.duration();
+        if (typeof seek === 'number' && duration > 0) {
+          setProgress((seek / duration) * 100);
+          setElapsed(Math.floor(seek));
+          if (onSongTimeUpdate) onSongTimeUpdate({ title: current.title, elapsed: Math.floor(seek) });
+        }
+      };
       if (playPromise !== undefined) {
         Promise.resolve(playPromise).then(() => {
-          interval = setInterval(() => {
-            const seek = soundRef.current.seek();
-            const duration = soundRef.current.duration();
-            if (typeof seek === 'number' && duration > 0) {
-              setProgress((seek / duration) * 100);
-            }
-          }, 500);
+          interval = setInterval(update, 500);
         }).catch(() => {
           setIsPlaying(false);
         });
       } else {
-        interval = setInterval(() => {
-          const seek = soundRef.current.seek();
-          const duration = soundRef.current.duration();
-          if (typeof seek === 'number' && duration > 0) {
-            setProgress((seek / duration) * 100);
-          }
-        }, 500);
+        interval = setInterval(update, 500);
       }
     } else {
       if (soundRef.current) {
@@ -84,9 +80,9 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, onSongTimeUpdate, current.title]);
 
-  const nextSong = () => {
+  const nextSong = useCallback(() => {
     setSongIndex((prev) => {
       if (isShuffling) {
         let next;
@@ -98,7 +94,7 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
       return (prev + 1) % SongConfig.length;
     });
     setIsPlaying(false);
-  };
+  }, [isShuffling, setSongIndex]);
   useEffect(() => {
     if (soundRef.current) {
       soundRef.current.onend = () => {
@@ -110,7 +106,7 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
         }
       };
     }
-  }, [isRepeating, isShuffling]);
+  }, [isRepeating, isShuffling, nextSong]);
   const prevSong = () => {
     setSongIndex((i) => i === 0 ? SongConfig.length - 1 : i - 1);
     setIsPlaying(false);

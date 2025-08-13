@@ -1,15 +1,11 @@
 .marquee-container {
   position: relative;
-  top: 5px; /* just inside top edge of player */
-  /* left: 0;
-  right: 0; */
+  top: 5px;
   overflow: hidden;
   white-space: nowrap;
   font-size: 0.8em;
   opacity: 0.6;
-  /* text-align: left;
-  padding: 0 10px; */
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.8); /* match header/menu bar */
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
 .marquee {
