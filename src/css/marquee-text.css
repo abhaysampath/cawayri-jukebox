@@ -1,0 +1,32 @@
+.marquee-container {
+  position: relative;
+  top: 5px; /* just inside top edge of player */
+  /* left: 0;
+  right: 0; */
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.8em;
+  opacity: 0.6;
+  /* text-align: left;
+  padding: 0 10px; */
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8); /* match header/menu bar */
+}
+
+.marquee {
+  display: inline-block;
+  animation: fadeIn 3s ease-in forwards, scroll-left 57s linear infinite;
+}
+
+.marquee span {
+  padding-right: 50px;
+}
+
+@keyframes fadeIn {
+  0% { transform: translateX(0); opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
