@@ -40,7 +40,7 @@ export default function SongPlayer({ songIndex, setSongIndex }) {
       onplayerror: () => setIsPlaying(false)
     });
     
-    MoodManager.setMood(current.color);
+    MoodManager.setMood(current.color || '#FFFFFF');
     setProgress(0);
     
     return () => {
