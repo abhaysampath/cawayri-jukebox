@@ -3,7 +3,6 @@
   bottom: 12%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,0.3);
   padding: 1rem;
   border-radius: 44px;
   margin-top: calc(100vh - 35rem);
