@@ -112,9 +112,23 @@
 }
 @media (max-width: 600px) {
   .about-window, .contact-form {
-    /* width: 77%; */
-    bottom: 300px;
-    padding: 1.2rem;
+    top: 80px;
+    bottom: 120px;
+    padding: 0.8rem;
+    width: 90%;
+    max-height: 75vh;
+  }
+  
+  .about-header h2, .contact-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .about-body, .contact-body {
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .gallery-scroll {
+    height: 250px;
   }
   
   .gallery img {

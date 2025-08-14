@@ -31,3 +31,14 @@
     }
   }
 }
+
+@media (max-width: 600px) {
+  .header {
+    margin-top: 1.5rem;
+  }
+  
+  .menu-bar > .menu-item {
+    margin: 0 8px;
+    font-size: 1rem;
+  }
+}
