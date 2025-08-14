@@ -50,7 +50,8 @@ export default function AboutWindow({ onClose }) {
             <br /><br />
             <strong>Let's connect!</strong> I'm always open to feedback, collaboration, and new ideas. Feel free to reach out if you'd like to chat or learn more
           </p>
-          <div className="social-links-container">
+        </div>
+        <div className="social-links-container">
             <a href="mailto:cawayri@gmail.com" className="social-link" title="Email">
               <FaEnvelope size={24} />
             </a>
@@ -66,7 +67,6 @@ export default function AboutWindow({ onClose }) {
             <a href="https://cawayri.bandcamp.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Bandcamp">
               <FaBandcamp size={24} />
             </a>
-          </div>
         </div>
         <div className="gallery-scroll">
           {galleryImages.map((img, idx) => (
