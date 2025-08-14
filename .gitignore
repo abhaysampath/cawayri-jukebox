@@ -8,6 +8,9 @@ public/video/
 # Image files
 public/photos/about-gallery/
 
+# Build output
+build/
+
 # Logs
 logs
 *.log
