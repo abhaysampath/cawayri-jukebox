@@ -9,6 +9,10 @@ export default function App() {
   const [songIndex, setSongIndex] = useState(0);
   const [activeMenu, setActiveMenu] = useState('Music Player');
 
+  React.useEffect(() => {
+    document.title = 'Cawayri Jukebox';
+  }, []);
+
   return (
     <MainLayout
       activeMenu={activeMenu}

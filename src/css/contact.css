@@ -33,6 +33,23 @@
   height: max-content;
 }
 
+.mailing-list {
+  margin: 0 7px;
+  display: flex;
+  align-items: left;
+  font: 10pt sans-serif;
+  > .mailing-list-checkbox {
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  > .mailing-list-label {
+    font-size: .9rem;
+    color: rgba(255,255,255,0.4);
+    padding: 2px;
+  }
+}
 .contact-form button:hover {
   background: rgba(255,255,255,0.4);
 }

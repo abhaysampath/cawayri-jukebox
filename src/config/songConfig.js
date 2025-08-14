@@ -13,7 +13,7 @@ const SongConfig = [
     },
     {
       title: "No Sleep Till Brooklyn (remix)",
-      artist: "Cawayri",
+      artist: "Cawayri // Beastie Boys",
       tempo: 100,
       key: "C min",
       src: [
@@ -25,7 +25,7 @@ const SongConfig = [
     },
     {
       title: "Knock You Out (remix)",
-      artist: "Cawayri / LL Cool J",
+      artist: "Cawayri // LL Cool J",
       tempo: 105,
       key: "F# min",
       src: [
@@ -37,7 +37,7 @@ const SongConfig = [
     },
     {
       title: "Pettai Rap (remix)",
-      artist: "Cawayri",
+      artist: "Cawayri // A.R. Rahman",
       tempo: 115,
       key: "C min",
       src: [
@@ -49,7 +49,7 @@ const SongConfig = [
     },
     {
       title: "All These Girls",
-      artist: "Cawayri / Yared",
+      artist: "Cawayri // Yared",
       tempo: 120,
       key: "Bb min",
       src: [
@@ -73,7 +73,7 @@ const SongConfig = [
     },
     {
       title: "Aerosol Can (remix)",
-      artist: "Cawayri",
+      artist: "Cawayri // Pharrell Williams",
       tempo: 124,
       key: "Eb min",
       src: [
@@ -85,7 +85,7 @@ const SongConfig = [
     },
     {
       title: "Dum Maro Dum (remix)",
-      artist: "Cawayri",
+      artist: "Cawayri // Asha Bhosle",
       tempo: 124,
       key: "D min",
       src: [
@@ -97,7 +97,7 @@ const SongConfig = [
     },
     {
       title: "Go Go Go",
-      artist: "Cawayri",
+      artist: "Cawayri // Shreya Ghoshal",
       tempo: 120,
       key: "D min",
       src: [
@@ -109,7 +109,7 @@ const SongConfig = [
     },
     {
       title: "I Feel Like Shashi Tharoor",
-      artist: "Cawayri ft. Raja Reborn",
+      artist: "Cawayri // Raja Reborn",
       tempo: 140,
       key: "B min",
       src: [
@@ -121,7 +121,7 @@ const SongConfig = [
     },
     {
       title: "Blinded By The Lights (remix)",
-      artist: "Cawayri / The Weeknd",
+      artist: "Cawayri // The Weeknd",
       tempo: 77,
       key: "A min",
       src: [
@@ -133,7 +133,7 @@ const SongConfig = [
     },
     {
       title: "Maza",
-      artist: "Cawayri",
+      artist: "Cawayri // Ilayaraja",
       tempo: 140,
       key: "A min",
       src: [
@@ -157,7 +157,7 @@ const SongConfig = [
     },
     {
       title: "Gimme The Light (remix)",
-      artist: "Cawayri / Sean Paul",
+      artist: "Cawayri // Sean Paul",
       tempo: 112,
       key: "A min",
       src: [

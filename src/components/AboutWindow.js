@@ -1,5 +1,6 @@
 
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { FaInstagram, FaTiktok, FaSoundcloud, FaBandcamp, FaEnvelope } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -41,14 +42,31 @@ export default function AboutWindow({ onClose }) {
         </div>
         <div className="about-body">
           <p>
-            Cawayri is a Brooklyn-based electronic artist and DJ weaving
-            together Bollywood, Carnatic music, and 90s R&amp;B into emotionally
-            rich, groove-heavy sets. A classically trained Carnatic vocalist
-            with years of live music experience in NYC, Connecticut, and New
-            Jersey, he brings a deep musical lineage into every performance. His
-            sound is introspective, textured, and transportive—like stepping
-            into a vivid dream or memory from another life.
+            Welcome to <strong>Cawayri Jukebox</strong>, a showcase for the music of <strong>Cawayri</strong>—a Brooklyn-based electronic musician and DJ blending Bollywood, Indian classical, and dreamy electronic textures with 90s R&amp;B. Dive into original tracks, remixes, and immersive sets that transport you into cinematic, groove-heavy soundscapes.
+            <br /><br />
+            I'm <strong>Abhay Sampath</strong>, the developer behind this site. By day, I'm a fullstack software developer with 12+ years of professional experience building web apps and software systems, and many more years of tinkering around on my own; by night, I'm a musician and producer trying to explore new sonic territory. This project is my way of bringing both worlds together using code and creativity to build a platform for music, interaction, and discovery.
+            <br /><br />
+            <strong>Cawayri Jukebox</strong> is a labor of love, and I'm excited to share it with you. Thank you for being here!
+            <br /><br />
+            <strong>Let's connect!</strong> I'm always open to feedback, collaboration, and new ideas. Feel free to reach out if you'd like to chat or learn more
           </p>
+          <div className="social-links-container">
+            <a href="mailto:cawayri@gmail.com" className="social-link" title="Email">
+              <FaEnvelope size={24} />
+            </a>
+            <a href="https://instagram.com/cawayri" target="_blank" rel="noopener noreferrer" className="social-link" title="Instagram">
+              <FaInstagram size={24} />
+            </a>
+            <a href="https://tiktok.com/@cawayri" target="_blank" rel="noopener noreferrer" className="social-link" title="TikTok">
+              <FaTiktok size={24} />
+            </a>
+            <a href="https://soundcloud.com/cawayri" target="_blank" rel="noopener noreferrer" className="social-link" title="SoundCloud">
+              <FaSoundcloud size={24} />
+            </a>
+            <a href="https://cawayri.bandcamp.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Bandcamp">
+              <FaBandcamp size={24} />
+            </a>
+          </div>
         </div>
         <div className="gallery-scroll">
           {galleryImages.map((img, idx) => (

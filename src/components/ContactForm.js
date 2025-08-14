@@ -1,33 +1,20 @@
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import '../css/contact.css';
 
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
-export default function ContactForm({ onClose, formData, setFormData, currentSongInfo }) {
-  const [submitted, setSubmitted] = useState(false);
+export default function ContactForm({ onClose, formData, setFormData }) {
   const overlayRef = useRef();
   const formRef = useRef();
-  const safeFormData = formData || { name: '', email: '', message: '' };
+  const safeFormData = formData || { name: '', email: '', message: '', mailingList: true };
 
   const submitForm = async () => {
     if (!safeFormData.name && !safeFormData.email && !safeFormData.message) return;
-    if (submitted) return;
-    setSubmitted(true);
     const data = new FormData();
     data.append('name', safeFormData.name);
     data.append('email', safeFormData.email);
-
-    const songInfo = currentSongInfo?.title ?
-        `\n---\nCurrent Song: ${currentSongInfo.title} (${typeof currentSongInfo.elapsed === 'number'
-        ? formatTime(currentSongInfo.elapsed) : ''})` : '';
-    data.append('message', safeFormData.message + songInfo);
+    data.append('message', safeFormData.message);
     try {
-      await fetch('https://formspree.io/f/xldlooea', {
+  await fetch(process.env.REACT_APP_FORMSPREE_ENDPOINT, {
         method: 'POST',
         body: data,
       });
@@ -41,7 +28,11 @@ export default function ContactForm({ onClose, formData, setFormData, currentSon
   };
 
   const handleChange = (e) => {
-    setFormData({ ...safeFormData, [e.target.name]: e.target.value });
+    const { name, type, checked, value } = e.target;
+    setFormData({
+      ...safeFormData,
+      [name]: type === 'checkbox' ? checked : value
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -91,9 +82,18 @@ export default function ContactForm({ onClose, formData, setFormData, currentSon
               onChange={handleChange}
               required
             ></textarea>
-            <div>
-              Current Song: {currentSongInfo?.title || 'Unknown'}{' '}
-              {typeof currentSongInfo?.elapsed === 'number' ? `(${formatTime(currentSongInfo.elapsed)})` : ''}
+            <div className='mailing-list'>
+              <input className='mailing-list-checkbox'
+                type="checkbox"
+                name="mailingList"
+                checked={!!safeFormData.mailingList}
+                onChange={handleChange}
+                id="mailingListCheckbox"
+                style={{ marginRight: '8px' }}
+              />
+              <label htmlFor="mailingListCheckbox" className='mailing-list-label'>
+                Add me to mailing list
+              </label>
             </div>
             <button className="contact-form" type="submit">Send</button>
           </form>

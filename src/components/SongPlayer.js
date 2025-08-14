@@ -26,30 +26,69 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       }
     }
   };
+  const shouldPlayRef = useRef(false);
+  const handleNextSong = () => {
+    shouldPlayRef.current = isPlaying;
+    setSongIndex((prev) => {
+      if (isShuffling) {
+        let next;
+        do {
+          next = Math.floor(Math.random() * SongConfig.length);
+        } while (next === prev);
+        return next;
+      }
+      return (prev + 1) % SongConfig.length;
+    });
+  };
+  const handlePrevSong = () => {
+    shouldPlayRef.current = isPlaying;
+    setSongIndex((i) => i === 0 ? SongConfig.length - 1 : i - 1);
+  };
 
   useEffect(() => {
     if (soundRef.current) {
       soundRef.current.unload();
     }
-    
+
     soundRef.current = new Howl({
       src: current.src,
       html5: true,
       volume: 1,
       preload: true,
-      onend: () => setIsPlaying(false),
+      onend: () => {
+        if (isRepeating) {
+          soundRef.current.seek(0);
+          soundRef.current.play();
+        } else {
+          shouldPlayRef.current = true;
+          setSongIndex((prev) => {
+            const shuffle = typeof isShuffling === 'function' ? isShuffling() : isShuffling;
+            if (shuffle) {
+              let next;
+              do {
+                next = Math.floor(Math.random() * SongConfig.length);
+              } while (next === prev);
+              return next;
+            }
+            return (prev + 1) % SongConfig.length;
+          });
+        }
+      },
       onplayerror: () => setIsPlaying(false)
     });
-    
-    MoodManager.setMood(current.color || '#FFFFFF');
+
+    MoodManager.setMood(current.color || '#fb8f61');
     setProgress(0);
-    
+    if (shouldPlayRef.current) {
+      setIsPlaying(true);
+      shouldPlayRef.current = false;
+    }
     return () => {
       if (soundRef.current) {
         soundRef.current.unload();
       }
     };
-  }, [current]);
+  }, [current, setSongIndex]);
   useEffect(() => {
     if (!soundRef.current) return;
     let interval;
@@ -84,33 +123,9 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
 
   const nextSong = useCallback(() => {
     setSongIndex((prev) => {
-      if (isShuffling) {
-        let next;
-        do {
-          next = Math.floor(Math.random() * SongConfig.length);
-        } while (next === prev);
-        return next;
-      }
       return (prev + 1) % SongConfig.length;
     });
-    setIsPlaying(false);
-  }, [isShuffling, setSongIndex]);
-  useEffect(() => {
-    if (soundRef.current) {
-      soundRef.current.onend = () => {
-        if (isRepeating) {
-          soundRef.current.seek(0);
-          soundRef.current.play();
-        } else {
-          nextSong();
-        }
-      };
-    }
-  }, [isRepeating, isShuffling, nextSong]);
-  const prevSong = () => {
-    setSongIndex((i) => i === 0 ? SongConfig.length - 1 : i - 1);
-    setIsPlaying(false);
-  };
+  }, [setSongIndex]);
 
   const togglePlayPause = async () => {
     await unlockAudio();
@@ -140,25 +155,17 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       </div>
       <MarqueeText text={current.scrollText} />
       <div className="player-controls">
-        <button
-          className={`icon-btn ${isShuffling ? 'active' : ''}`}
-          onClick={() => setIsShuffling(!isShuffling)}
-          title="Shuffle"
-        >
-          🔀
-        </button>
-        <button onClick={prevSong} className="control-btn">⏮</button>
+        <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
+          onClick={() => setIsRepeating(!isRepeating)}
+          title="Repeat">🔁</button>
+        <button onClick={handlePrevSong} className="control-btn">⏮</button>
         <button onClick={togglePlayPause} className="control-btn play-btn">
           {isPlaying ? '❚❚' : '▶'}
         </button>
-        <button onClick={nextSong} className="control-btn">⏭</button>
-        <button
-          className={`icon-btn ${isRepeating ? 'active' : ''}`}
-          onClick={() => setIsRepeating(!isRepeating)}
-          title="Repeat"
-        >
-          🔁
-        </button>
+        <button onClick={handleNextSong} className="control-btn">⏭</button>
+        <button className={`icon-btn ${isShuffling ? 'active' : ''}`}
+          onClick={() => setIsShuffling(!isShuffling)}
+          title="Shuffle">🔀</button>
       </div>
       {!audioUnlocked && (
         <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.5rem' }}>
