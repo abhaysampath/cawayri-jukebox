@@ -1,0 +1,28 @@
+.marquee-container {
+  position: relative;
+  top: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.8em;
+  opacity: 0.6;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.marquee {
+  display: inline-block;
+  animation: fadeIn 3s ease-in forwards, scroll-left 57s linear infinite;
+}
+
+.marquee span {
+  padding-right: 50px;
+}
+
+@keyframes fadeIn {
+  0% { transform: translateX(0); opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}

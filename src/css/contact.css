@@ -1,0 +1,59 @@
+.contact-body {
+  display: flex;
+  flex-direction: column;
+}
+.contact-body textarea {
+  min-height: 108px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: rgba(29, 27, 27, 0.5);
+  font: 1em sans-serif;
+}
+
+.contact-form button[type="submit"] {
+  background: #fb8f61;
+  border: none;
+  padding: 0.6rem;
+  margin-top: 120px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  width: 84%;
+  height: max-content;
+}
+
+.mailing-list {
+  margin: 0 7px;
+  display: flex;
+  align-items: left;
+  font: 10pt sans-serif;
+  > .mailing-list-checkbox {
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  > .mailing-list-label {
+    font-size: .9rem;
+    color: rgba(255,255,255,0.4);
+    padding: 2px;
+  }
+}
+.contact-form button:hover {
+  background: rgba(255,255,255,0.4);
+}
+.contact-form button:active {
+  background: rgba(255,255,255,0.6);
+  transform: scale(0.95);
+}

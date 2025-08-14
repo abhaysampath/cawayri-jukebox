@@ -1,0 +1,33 @@
+.header {
+  margin-top: 3rem;
+  text-align: center;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
+  .menu-bar {
+    display: flex;
+    justify-content: center;
+    > .menu-item {
+      margin: 0 12px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: color 0.3s, transform 0.3s;
+    }
+    > .menu-item.selected {
+      color: #e5ac94;
+      transform: scale(1.1);
+      opacity: 1;
+    }
+    > .menu-item.dimmed {
+      color: rgba(255, 255, 255, 0.6);
+      transform: scale(1);
+      transition: color 0.3s, transform 0.3s;
+    }
+    > .menu-item:hover {
+      color: #fb8f61;
+    }
+    > .menu-item:active {
+      transform: scale(0.95);
+    }
+  }
+}
