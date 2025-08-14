@@ -57,8 +57,8 @@ export default function ContactForm({ onClose, formData, setFormData }) {
             &times;
           </button>
         </div>
-        <div className="contact-body" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <form ref={formRef} onSubmit={handleSubmit} autoComplete="off">
+        <div className="contact-body">
+          <form className="form" ref={formRef} onSubmit={handleSubmit} autoComplete="off">
             <input
               type="text"
               name="name"
@@ -95,7 +95,7 @@ export default function ContactForm({ onClose, formData, setFormData }) {
                 Add me to mailing list
               </label>
             </div>
-            <button className="contact-form" type="submit">Send</button>
+            <button className="contact-submit-btn" type="submit">Send</button>
           </form>
         </div>
       </motion.div>
