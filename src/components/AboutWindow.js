@@ -1,6 +1,7 @@
 
 import React, { useRef, useState } from "react";
-import { FaInstagram, FaTiktok, FaSoundcloud, FaBandcamp, FaEnvelope } from 'react-icons/fa';
+// import { FaInstagram, FaTiktok, FaSoundcloud, FaBandcamp, FaEnvelope } from 'react-icons/fa';
+import { InstagramLogoIcon, TiktokLogoIcon, SoundcloudLogoIcon, ParallelogramIcon, EnvelopeOpenIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -53,19 +54,19 @@ export default function AboutWindow({ onClose }) {
         </div>
         <div className="social-links-container">
             <a href="mailto:cawayri@gmail.com" className="social-link" title="Email">
-              <FaEnvelope size={24} />
+              <EnvelopeOpenIcon size={24} />
             </a>
             <a href="https://instagram.com/cawayri" target="_blank" rel="noopener noreferrer" className="social-link" title="Instagram">
-              <FaInstagram size={24} />
+              <InstagramLogoIcon size={24} />
             </a>
             <a href="https://tiktok.com/@cawayri" target="_blank" rel="noopener noreferrer" className="social-link" title="TikTok">
-              <FaTiktok size={24} />
+              <TiktokLogoIcon size={24} />
             </a>
             <a href="https://soundcloud.com/cawayri" target="_blank" rel="noopener noreferrer" className="social-link" title="SoundCloud">
-              <FaSoundcloud size={24} />
+              <SoundcloudLogoIcon size={24} />
             </a>
             <a href="https://cawayri.bandcamp.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Bandcamp">
-              <FaBandcamp size={24} />
+              <ParallelogramIcon size={24} />
             </a>
         </div>
         <div className="gallery-scroll">
