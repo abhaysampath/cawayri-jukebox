@@ -3,6 +3,7 @@ import { Howl, Howler } from 'howler';
 import SongConfig from '../config/songConfig';
 import MoodManager from './MoodManager';
 import MarqueeText from './MarqueeText';
+import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
 import '../css/song-player.css';
 
 export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }) {
@@ -157,15 +158,15 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       <div className="player-controls">
         <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
           onClick={() => setIsRepeating(!isRepeating)}
-          title="Repeat">🔁</button>
-        <button onClick={handlePrevSong} className="control-btn">⏮</button>
+          title="Repeat"><RepeatIcon /></button>
+        <button onClick={handlePrevSong} className="control-btn"><SkipBackIcon /></button>
         <button onClick={togglePlayPause} className="control-btn play-btn">
-          {isPlaying ? '❚❚' : '▶'}
+          {isPlaying ? <PauseIcon /> : <PlayIcon />}
         </button>
-        <button onClick={handleNextSong} className="control-btn">⏭</button>
+        <button onClick={handleNextSong} className="control-btn"><SkipForwardIcon /></button>
         <button className={`icon-btn ${isShuffling ? 'active' : ''}`}
           onClick={() => setIsShuffling(!isShuffling)}
-          title="Shuffle">🔀</button>
+          title="Shuffle"><ShuffleIcon /></button>
       </div>
       {!audioUnlocked && (
         <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.5rem' }}>
