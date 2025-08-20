@@ -3,6 +3,7 @@ import { Howl, Howler } from 'howler';
 import SongConfig from '../config/songConfig';
 import MoodManager from './MoodManager';
 import MarqueeText from './MarqueeText';
+import Waveform from './Waveform';
 import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
 import '../css/song-player.css';
 
@@ -148,6 +149,7 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
 
   return (
     <div className="song-player" onClick={unlockAudio}>
+      <Waveform isPlaying={isPlaying} />
       <h3 className="title-artist">
         {current.title} – {current.artist || 'Cawayri'}
       </h3>

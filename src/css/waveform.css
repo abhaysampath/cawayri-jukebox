@@ -1,0 +1,88 @@
+.waveform {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 300px;
+  height: 120px;
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.waveform-bar {
+  width: 8px;
+  height: 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(251, 143, 97, 0.8) 0%,
+    rgba(255, 204, 0, 0.6) 50%,
+    rgba(108, 61, 40, 0.8) 100%
+  );
+  border-radius: 4px;
+  transform-origin: center;
+  animation: wave-idle 2s ease-in-out infinite;
+}
+
+.waveform.playing .waveform-bar {
+  animation: wave-playing 0.8s ease-in-out infinite;
+}
+
+@keyframes wave-idle {
+  0%, 100% {
+    transform: scaleY(0.3);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleY(0.6);
+    opacity: 0.5;
+  }
+}
+
+@keyframes wave-playing {
+  0%, 100% {
+    transform: scaleY(0.4);
+    opacity: 0.4;
+  }
+  25% {
+    transform: scaleY(1.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scaleY(0.6);
+    opacity: 0.6;
+  }
+  75% {
+    transform: scaleY(1.4);
+    opacity: 0.7;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .waveform {
+    width: 250px;
+    height: 100px;
+  }
+  
+  .waveform-bar {
+    width: 6px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .waveform {
+    width: 200px;
+    height: 80px;
+  }
+  
+  .waveform-bar {
+    width: 5px;
+    height: 12px;
+  }
+}
