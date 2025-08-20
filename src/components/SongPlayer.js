@@ -6,13 +6,12 @@ import MarqueeText from './MarqueeText';
 import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
 import '../css/song-player.css';
 
-export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }) {
+export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate, onAudioStateChange }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
 
   const soundRef = useRef(null);
   const current = SongConfig[songIndex];
@@ -84,12 +83,22 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       setIsPlaying(true);
       shouldPlayRef.current = false;
     }
+    
+    // Notify parent about audio state changes
+    if (onAudioStateChange) {
+      onAudioStateChange({
+        sound: soundRef.current,
+        isPlaying: false, // Will be updated in the playing effect
+        currentSong: current
+      });
+    }
+    
     return () => {
       if (soundRef.current) {
         soundRef.current.unload();
       }
     };
-  }, [current, setSongIndex]);
+  }, [current, setSongIndex, onAudioStateChange, isRepeating, isShuffling]);
   useEffect(() => {
     if (!soundRef.current) return;
     let interval;
@@ -100,28 +109,52 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         const duration = soundRef.current.duration();
         if (typeof seek === 'number' && duration > 0) {
           setProgress((seek / duration) * 100);
-          setElapsed(Math.floor(seek));
           if (onSongTimeUpdate) onSongTimeUpdate({ title: current.title, elapsed: Math.floor(seek) });
         }
       };
       if (playPromise !== undefined) {
         Promise.resolve(playPromise).then(() => {
           interval = setInterval(update, 500);
+          // Notify that audio is now playing
+          if (onAudioStateChange) {
+            onAudioStateChange({
+              sound: soundRef.current,
+              isPlaying: true,
+              currentSong: current
+            });
+          }
         }).catch(() => {
           setIsPlaying(false);
         });
       } else {
         interval = setInterval(update, 500);
+        // Notify that audio is now playing
+        if (onAudioStateChange) {
+          onAudioStateChange({
+            sound: soundRef.current,
+            isPlaying: true,
+            currentSong: current
+          });
+        }
       }
     } else {
       if (soundRef.current) {
         soundRef.current.pause();
       }
       clearInterval(interval);
+      // Notify that audio is paused
+      if (onAudioStateChange) {
+        onAudioStateChange({
+          sound: soundRef.current,
+          isPlaying: false,
+          currentSong: current
+        });
+      }
     }
     return () => clearInterval(interval);
-  }, [isPlaying, onSongTimeUpdate, current.title]);
+  }, [isPlaying, onSongTimeUpdate, current.title, onAudioStateChange, current]);
 
+  // eslint-disable-next-line no-unused-vars
   const nextSong = useCallback(() => {
     setSongIndex((prev) => {
       return (prev + 1) % SongConfig.length;
