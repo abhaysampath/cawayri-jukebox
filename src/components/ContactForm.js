@@ -14,7 +14,7 @@ export default function ContactForm({ onClose, formData, setFormData }) {
     data.append('email', safeFormData.email);
     data.append('message', safeFormData.message);
     try {
-  await fetch(process.env.REACT_APP_FORMSPREE_ENDPOINT, {
+      await fetch(process.env.REACT_APP_FORMSPREE_ENDPOINT, {
         method: 'POST',
         body: data,
       });
@@ -63,6 +63,7 @@ export default function ContactForm({ onClose, formData, setFormData }) {
               type="text"
               name="name"
               placeholder="Name"
+              autoComplete='name'
               value={safeFormData.name}
               onChange={handleChange}
               required
@@ -71,6 +72,7 @@ export default function ContactForm({ onClose, formData, setFormData }) {
               type="email"
               name="email"
               placeholder="Email"
+              autoComplete='email'
               value={safeFormData.email}
               onChange={handleChange}
               required
@@ -78,10 +80,12 @@ export default function ContactForm({ onClose, formData, setFormData }) {
             <textarea
               name="message"
               placeholder="Message"
+              autoComplete='message'
               value={safeFormData.message}
               onChange={handleChange}
               required
             ></textarea>
+            <div className="contact-footer">
             <div className='mailing-list'>
               <input className='mailing-list-checkbox'
                 type="checkbox"
@@ -89,13 +93,13 @@ export default function ContactForm({ onClose, formData, setFormData }) {
                 checked={!!safeFormData.mailingList}
                 onChange={handleChange}
                 id="mailingListCheckbox"
-                style={{ marginRight: '8px' }}
               />
               <label htmlFor="mailingListCheckbox" className='mailing-list-label'>
                 Add me to mailing list
               </label>
             </div>
             <button className="contact-submit-btn" type="submit">Send</button>
+            </div>
           </form>
         </div>
       </motion.div>

@@ -1,10 +1,14 @@
 
 import React, { useRef, useState } from "react";
-// import { FaInstagram, FaTiktok, FaSoundcloud, FaBandcamp, FaEnvelope } from 'react-icons/fa';
-import { InstagramLogoIcon, TiktokLogoIcon, SoundcloudLogoIcon, ParallelogramIcon, EnvelopeOpenIcon } from '@phosphor-icons/react';
+import { InstagramLogoIcon, TiktokLogoIcon, SoundcloudLogoIcon, ParallelogramIcon, EnvelopeOpenIcon, LinkedinLogoIcon, GithubLogoIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import Lightbox from "yet-another-react-lightbox";
+import Swipe from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
 import '../css/about.css';
 
 const galleryImages = [
@@ -66,7 +70,13 @@ export default function AboutWindow({ onClose }) {
               <SoundcloudLogoIcon size={24} />
             </a>
             <a href="https://cawayri.bandcamp.com" target="_blank" rel="noopener noreferrer" className="social-link" title="Bandcamp">
-              <ParallelogramIcon size={24} />
+              <ParallelogramIcon size={22} />
+            </a>
+            <a href="https://www.linkedin.com/in/abhaysampath" target="_blank" rel="noopener noreferrer" className="social-link" title="LinkedIn">
+              <LinkedinLogoIcon size={24} />
+            </a>
+            <a href="https://github.com/abhaysampath" target="_blank" rel="noopener noreferrer" className="social-link" title="GitHub">
+              <GithubLogoIcon size={24} />
             </a>
         </div>
         <div className="gallery-scroll">
@@ -74,7 +84,7 @@ export default function AboutWindow({ onClose }) {
             <motion.div
               key={idx}
               className="gallery-item"
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: .95 }}
               transition={{ type: "spring", stiffness: 200 }}
               onClick={() => setLightboxIndex(idx)}
             >
@@ -88,7 +98,8 @@ export default function AboutWindow({ onClose }) {
           open={lightboxIndex >= 0}
           index={lightboxIndex}
           close={() => setLightboxIndex(-1)}
-          slides={galleryImages.map((img) => ({ src: img.src }))}
+          slides={galleryImages.map((img) => ({ src: img.src, description: img.alt }))}
+          plugins={[Swipe, Zoom, Fullscreen, Thumbnails]}
         />
       )}
     </div>
