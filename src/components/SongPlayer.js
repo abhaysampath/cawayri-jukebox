@@ -6,7 +6,7 @@ import MarqueeText from './MarqueeText';
 import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
 import '../css/song-player.css';
 
-export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }) {
+export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate, onAudioStateChange }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
@@ -84,6 +84,16 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       setIsPlaying(true);
       shouldPlayRef.current = false;
     }
+    
+    // Notify parent about audio state changes
+    if (onAudioStateChange) {
+      onAudioStateChange({
+        sound: soundRef.current,
+        isPlaying: false, // Will be updated in the playing effect
+        currentSong: current
+      });
+    }
+    
     return () => {
       if (soundRef.current) {
         soundRef.current.unload();
@@ -107,17 +117,41 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       if (playPromise !== undefined) {
         Promise.resolve(playPromise).then(() => {
           interval = setInterval(update, 500);
+          // Notify that audio is now playing
+          if (onAudioStateChange) {
+            onAudioStateChange({
+              sound: soundRef.current,
+              isPlaying: true,
+              currentSong: current
+            });
+          }
         }).catch(() => {
           setIsPlaying(false);
         });
       } else {
         interval = setInterval(update, 500);
+        // Notify that audio is now playing
+        if (onAudioStateChange) {
+          onAudioStateChange({
+            sound: soundRef.current,
+            isPlaying: true,
+            currentSong: current
+          });
+        }
       }
     } else {
       if (soundRef.current) {
         soundRef.current.pause();
       }
       clearInterval(interval);
+      // Notify that audio is paused
+      if (onAudioStateChange) {
+        onAudioStateChange({
+          sound: soundRef.current,
+          isPlaying: false,
+          currentSong: current
+        });
+      }
     }
     return () => clearInterval(interval);
   }, [isPlaying, onSongTimeUpdate, current.title]);
