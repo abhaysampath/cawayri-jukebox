@@ -51,20 +51,22 @@
 .control-btn {
   background: rgba(255,255,255,0.2);
   color: white;
-  border: none;
+  padding: 5px 0 0 0;
+  border: 2px double rgba(255, 255, 255, 0.60);
   border-radius: 50%;
   width: 56px;
   height: 56px;
   font-size: 1.4rem;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: background 0.8s ease, transform 0.5s ease;
 }
 
 .control-btn:hover {
-  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #6c3d28ab, #3b341aab);
 }
 .control-btn:active {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
   transform: scale(0.95);
 }
 .play-btn {
