@@ -1,0 +1,73 @@
+.waveform-container {
+  position: relative;
+  width: 100%;
+  margin: 1rem 0;
+  padding: 0 1rem;
+  opacity: 0.9; /* More visible initially */
+  transition: opacity 0.3s ease;
+  z-index: 2; /* Ensure it's above the video */
+}
+
+.waveform-container:hover {
+  opacity: 1;
+}
+
+.waveform {
+  width: 100%;
+  height: 120px; /* Fixed height */
+  min-height: 120px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4); /* More visible background */
+  backdrop-filter: blur(2px);
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid rgba(251, 143, 97, 0.2); /* Subtle border for visibility */
+}
+
+/* Override WaveSurfer styles for better integration */
+.waveform wave {
+  overflow: visible !important;
+}
+
+.waveform canvas {
+  border-radius: 6px;
+}
+
+.waveform > div {
+  height: 100% !important;
+}
+
+.waveform-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .waveform-container {
+    padding: 0 0.5rem;
+    margin: 0.5rem 0;
+  }
+  
+  .waveform {
+    height: 80px;
+    min-height: 80px;
+    padding: 8px;
+  }
+}
+
+@media (max-height: 600px) {
+  .waveform {
+    height: 60px;
+    min-height: 60px;
+    padding: 6px;
+  }
+}
