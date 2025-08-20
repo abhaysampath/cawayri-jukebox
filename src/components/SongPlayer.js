@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Howl, Howler } from 'howler';
 import SongConfig from '../config/songConfig';
 import MoodManager from './MoodManager';
 import MarqueeText from './MarqueeText';
+import SmokeAnimation from './SmokeAnimation';
+import AudioWaveform from './AudioWaveform';
 import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
 import '../css/song-player.css';
 
@@ -12,7 +14,8 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
+  const [showSmoke, setShowSmoke] = useState(false);
+  const [showWaveform, setShowWaveform] = useState(false);
 
   const soundRef = useRef(null);
   const current = SongConfig[songIndex];
@@ -22,6 +25,10 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       try {
         await Howler.ctx.resume();
         setAudioUnlocked(true);
+        // Show smoke animation when audio is first unlocked
+        if (!showSmoke && !showWaveform) {
+          setShowSmoke(true);
+        }
       } catch (error) {
         console.warn('Failed to unlock audio context:', error);
       }
@@ -89,7 +96,7 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         soundRef.current.unload();
       }
     };
-  }, [current, setSongIndex]);
+  }, [current, setSongIndex, isRepeating, isShuffling]);
   useEffect(() => {
     if (!soundRef.current) return;
     let interval;
@@ -100,7 +107,6 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         const duration = soundRef.current.duration();
         if (typeof seek === 'number' && duration > 0) {
           setProgress((seek / duration) * 100);
-          setElapsed(Math.floor(seek));
           if (onSongTimeUpdate) onSongTimeUpdate({ title: current.title, elapsed: Math.floor(seek) });
         }
       };
@@ -122,12 +128,6 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
     return () => clearInterval(interval);
   }, [isPlaying, onSongTimeUpdate, current.title]);
 
-  const nextSong = useCallback(() => {
-    setSongIndex((prev) => {
-      return (prev + 1) % SongConfig.length;
-    });
-  }, [setSongIndex]);
-
   const togglePlayPause = async () => {
     await unlockAudio();
     
@@ -141,9 +141,18 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         }
       }
       setIsPlaying(true);
+      // Show waveform when playing starts
+      if (audioUnlocked) {
+        setShowWaveform(true);
+      }
     } else {
       setIsPlaying(false);
     }
+  };
+
+  const handleSmokeComplete = () => {
+    setShowSmoke(false);
+    setShowWaveform(true);
   };
 
   return (
@@ -155,6 +164,23 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         <div className="progress" style={{ width: `${progress}%` }} />
       </div>
       <MarqueeText text={current.scrollText} />
+      
+      {/* Animation Section */}
+      {audioUnlocked && (
+        <div className="animation-section">
+          <SmokeAnimation 
+            text="Welcome to the Experience"
+            isVisible={showSmoke}
+            onComplete={handleSmokeComplete}
+          />
+          {showWaveform && (
+            <AudioWaveform 
+              isPlaying={isPlaying}
+            />
+          )}
+        </div>
+      )}
+      
       <div className="player-controls">
         <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
           onClick={() => setIsRepeating(!isRepeating)}
@@ -168,11 +194,6 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
           onClick={() => setIsShuffling(!isShuffling)}
           title="Shuffle"><ShuffleIcon /></button>
       </div>
-      {!audioUnlocked && (
-        <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.5rem' }}>
-          Click to enable audio
-        </div>
-      )}
     </div>
   );
 }
