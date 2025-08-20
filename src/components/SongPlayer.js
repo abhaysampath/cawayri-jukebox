@@ -12,6 +12,7 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [elapsed, setElapsed] = useState(0);
 
   const soundRef = useRef(null);
@@ -89,7 +90,7 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         soundRef.current.unload();
       }
     };
-  }, [current, setSongIndex]);
+  }, [current, setSongIndex, isRepeating, isShuffling]);
   useEffect(() => {
     if (!soundRef.current) return;
     let interval;
@@ -122,6 +123,7 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
     return () => clearInterval(interval);
   }, [isPlaying, onSongTimeUpdate, current.title]);
 
+  // eslint-disable-next-line no-unused-vars
   const nextSong = useCallback(() => {
     setSongIndex((prev) => {
       return (prev + 1) % SongConfig.length;
