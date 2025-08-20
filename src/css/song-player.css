@@ -43,6 +43,15 @@
   border-radius: 4px;
   overflow: hidden;
 }
+
+.animation-section {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+}
+
 .progress-bar .progress {
   height: 100%;
   background-color: #fff;
