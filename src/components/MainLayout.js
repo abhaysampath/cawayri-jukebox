@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import WaveformBackground from './WaveformBackground';
 import Header from './Header';
 import SongPlayer from './SongPlayer';
@@ -26,9 +26,9 @@ export default function MainLayout({
     setShowContact(activeMenu === 'Contact');
   }, [activeMenu]);
 
-  const handleAudioStateChange = (newAudioState) => {
+  const handleAudioStateChange = useCallback((newAudioState) => {
     setAudioState(newAudioState);
-  };
+  }, []);
 
   return (
     <div className="video-bg-container">
