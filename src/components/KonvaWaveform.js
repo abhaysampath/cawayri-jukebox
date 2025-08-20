@@ -57,16 +57,20 @@ const KonvaWaveform = ({ isPlaying }) => {
   // Generate initial waveforms
   useEffect(() => {
     const initialWaveforms = [];
-    for (let i = 0; i < 5; i++) {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    for (let i = 0; i < 6; i++) {
       initialWaveforms.push({
         id: i,
-        points: generateWavePoints(window.innerWidth, 200 + i * 80, i),
-        opacity: 0.4 + (i * 0.15),
-        strokeWidth: 3 + (i * 0.5),
-        phase: i * Math.PI / 3,
-        frequency: 0.005 + (i * 0.003),
-        amplitude: 40 + (i * 15),
-        color: `hsl(${190 + i * 15}, 70%, ${60 + i * 8}%)`,
+        points: generateWavePoints(screenWidth, (screenHeight * 0.3) + i * (screenHeight * 0.12), i),
+        opacity: 0.35 + (i * 0.12),
+        strokeWidth: 2.5 + (i * 0.7),
+        phase: i * Math.PI / 2.5,
+        frequency: 0.004 + (i * 0.0025),
+        amplitude: 35 + (i * 12),
+        color: `hsl(${185 + i * 18}, 75%, ${55 + i * 7}%)`,
+        speed: 1.2 + (i * 0.3),
       });
     }
     setWaveforms(initialWaveforms);
@@ -110,10 +114,12 @@ const KonvaWaveform = ({ isPlaying }) => {
       setWaveforms(prevWaveforms => 
         prevWaveforms.map((wave, index) => {
           const newPoints = [];
-          const segments = 120;
+          const segments = 150;
           const time = Date.now() * 0.001;
+          const screenWidth = window.innerWidth;
+          const screenHeight = window.innerHeight;
           
-          for (let i = 0; i <= window.innerWidth; i += window.innerWidth / segments) {
+          for (let i = 0; i <= screenWidth; i += screenWidth / segments) {
             let audioWaveInfluence = 0;
             
             if (hasAudioData && dataArray) {
@@ -121,23 +127,26 @@ const KonvaWaveform = ({ isPlaying }) => {
               const freqRange = Math.floor(dataArray.length / prevWaveforms.length);
               const startFreq = index * freqRange;
               const endFreq = Math.min(startFreq + freqRange, dataArray.length - 1);
-              const segmentIndex = Math.floor((i / window.innerWidth) * (endFreq - startFreq)) + startFreq;
-              audioWaveInfluence = (dataArray[segmentIndex] / 255) * wave.amplitude * 1.5;
+              const segmentIndex = Math.floor((i / screenWidth) * (endFreq - startFreq)) + startFreq;
+              audioWaveInfluence = (dataArray[segmentIndex] / 255) * wave.amplitude * 2;
             }
             
-            // Create flowing water effect (always present)
-            const baseWave = Math.sin((i * wave.frequency) + (time * 2) + wave.phase) * wave.amplitude;
-            const flowingEffect = Math.sin((i * 0.004) + (time * 1.8) + wave.phase) * 20;
-            const secondaryFlow = Math.cos((i * 0.002) + (time * 1.2) + wave.phase * 1.5) * 10;
+            // Create flowing water effect with enhanced movement
+            const baseWave = Math.sin((i * wave.frequency) + (time * wave.speed) + wave.phase) * wave.amplitude;
+            const flowingEffect = Math.sin((i * 0.003) + (time * 1.8) + wave.phase) * 25;
+            const secondaryFlow = Math.cos((i * 0.0015) + (time * 1.3) + wave.phase * 1.3) * 15;
+            const tertiaryFlow = Math.sin((i * 0.006) + (time * 0.8) + wave.phase * 0.7) * 8;
             
             // Enhanced movement when playing
-            const playingMultiplier = isPlaying ? 1.5 : 0.8;
-            const audioBoost = isPlaying ? audioInfluence * 30 : 0;
+            const playingMultiplier = isPlaying ? 1.8 : 1.0;
+            const audioBoost = isPlaying ? audioInfluence * 40 : 0;
             
-            const y = (200 + index * 80) + 
+            const baseY = (screenHeight * 0.3) + index * (screenHeight * 0.12);
+            const y = baseY + 
                      (baseWave * playingMultiplier) + 
                      (flowingEffect * playingMultiplier) + 
-                     secondaryFlow + 
+                     (secondaryFlow * playingMultiplier) + 
+                     tertiaryFlow + 
                      audioWaveInfluence + 
                      audioBoost;
             
@@ -147,7 +156,7 @@ const KonvaWaveform = ({ isPlaying }) => {
           return {
             ...wave,
             points: newPoints,
-            opacity: Math.max(0.3, wave.opacity + (isPlaying ? audioInfluence * 0.4 : 0)),
+            opacity: Math.max(0.25, wave.opacity + (isPlaying ? audioInfluence * 0.3 : 0)),
           };
         })
       );
