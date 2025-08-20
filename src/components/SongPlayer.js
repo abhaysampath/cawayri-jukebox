@@ -6,8 +6,15 @@ import MarqueeText from './MarqueeText';
 import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
 import '../css/song-player.css';
 
-export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }) {
+export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate, onPlayingStateChange }) {
   const [isPlaying, setIsPlaying] = useState(false);
+  
+  // Notify parent component of playing state changes
+  useEffect(() => {
+    if (onPlayingStateChange) {
+      onPlayingStateChange(isPlaying);
+    }
+  }, [isPlaying, onPlayingStateChange]);
   const [progress, setProgress] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
