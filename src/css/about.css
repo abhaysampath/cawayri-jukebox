@@ -170,6 +170,71 @@
     top: 12px;
     bottom: calc(100vh*0.1 + 32px);
     width: 80%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+  .about-header, .contact-header {
+    padding: .1rem;
+  }
+  .gallery-scroll {
+    height: 100px;
+    padding-bottom: 4px;
+    bottom: 0;
+  }
+  .yarl__slide {
+    max-width: 108vw;
+    left: 45px;
+    right: 0;
+  }
+}
+.yarl__slide img, .yarl__slide_image {
+  max-height: 100vh;
+  object-fit: contain;
+  margin-left: 0;
+}
+.yarl__carousel_with_slides {
+  column-gap: 20px !important;
+}
+.yarl__button {
+  font-size: 1rem !important;
+  top: 12px !important;
+  right: 12px !important;
+  background: rgba(0,0,0,0.5) !important;
+  border-radius: 3px;
+  padding: 0;
+  margin: 0 10px;
+  transition: opacity 0.2s ease;
+}
+.yarl__button:hover {
+  opacity: 0.85;
+}
+.yarl__thumbnails_thumbnail {
+  width: 80px !important;
+  height: 80px !important;
+  padding: 0 !important;
+  margin-bottom: 25px;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.yarl__thumbnails_thumbnail .yarl__slide_image {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  max-width: none !important;
+  max-height: none !important;
+  background: #000 !important;
+}
+
+@media (max-width: 600px), (max-height: 1025px) {
+  .about-window, .contact-form {
+    top: 12px;
+    bottom: calc(100vh*0.1 + 32px);
+    width: 80%;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
   .about-header, .contact-header {
     padding: .1rem;
