@@ -86,19 +86,19 @@ export default function ContactForm({ onClose, formData, setFormData }) {
               required
             ></textarea>
             <div className="contact-footer">
-            <div className='mailing-list'>
-              <input className='mailing-list-checkbox'
-                type="checkbox"
-                name="mailingList"
-                checked={!!safeFormData.mailingList}
-                onChange={handleChange}
-                id="mailingListCheckbox"
-              />
-              <label htmlFor="mailingListCheckbox" className='mailing-list-label'>
-                Add me to mailing list
-              </label>
-            </div>
-            <button className="contact-submit-btn" type="submit">Send</button>
+              <div className='mailing-list'>
+                <input className='mailing-list-checkbox'
+                  type="checkbox"
+                  name="mailingList"
+                  checked={!!safeFormData.mailingList}
+                  onChange={handleChange}
+                  id="mailingListCheckbox"
+                />
+                <label htmlFor="mailingListCheckbox" className='mailing-list-label'>
+                  Add me to mailing list
+                </label>
+              </div>
+              <button className="contact-submit-btn" type="submit">Send</button>
             </div>
           </form>
         </div>
