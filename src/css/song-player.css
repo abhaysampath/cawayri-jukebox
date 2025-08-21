@@ -12,7 +12,7 @@
   background-color: rgba(250, 235, 215, 0.08);
   color: rgba(252, 245, 230, 0.9);
   /* Box styling */
-  border: 2.4px solid rgba(250, 235, 215, 0.12);
+  border: 3.2px double rgba(250, 235, 215, 0.12);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   border-radius: 40px;
 }
@@ -63,7 +63,7 @@
   background: rgba(250, 235, 215, 0.2);
   color: rgba(252, 245, 230, 0.65);
   padding: 5px 0 0 0;
-  border: 3.2px double rgba(250, 235, 215, 0.27);
+  border: 2.7px double rgba(250, 235, 215, 0.27);
   border-radius: 40%;
   width: 52px;
   height: 52px;
@@ -84,7 +84,7 @@
   width: 80px;
   height: 80px;
   font-size: 2rem;
-  border: 4.2px double rgba(250, 235, 215, 0.32);
+  border: 3.2px double rgba(250, 235, 215, 0.32);
 }
 .icon-btn {
   background: none;
