@@ -1,20 +1,27 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Howl, Howler } from 'howler';
 import SongConfig from '../config/songConfig';
 import MoodManager from './MoodManager';
 import MarqueeText from './MarqueeText';
 import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
+import { AudioVisualizer } from 'react-audio-visualize';
 import '../css/song-player.css';
 
 export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const [isRepeating, setIsRepeating] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [vizWidth, setVizWidth] = useState(0);
+  const [showUnlockOverlay, setShowUnlockOverlay] = useState(false);
 
   const soundRef = useRef(null);
+  const playerRef = useRef(null);
+  const waveformRef = useRef(null);
+  const isRepeatingRef = useRef(false);
+  const isShufflingRef = useRef(false);
   const current = SongConfig[songIndex];
 
   const unlockAudio = async () => {
@@ -57,13 +64,13 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       volume: 1,
       preload: true,
       onend: () => {
-        if (isRepeating) {
+        if (isRepeatingRef.current) {
           soundRef.current.seek(0);
           soundRef.current.play();
         } else {
           shouldPlayRef.current = true;
           setSongIndex((prev) => {
-            const shuffle = typeof isShuffling === 'function' ? isShuffling() : isShuffling;
+          const shuffle = isShufflingRef.current;
             if (shuffle) {
               let next;
               do {
@@ -79,7 +86,7 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
     });
 
     MoodManager.setMood(current.color || '#fb8f61');
-    setProgress(0);
+    setElapsed(0);
     if (shouldPlayRef.current) {
       setIsPlaying(true);
       shouldPlayRef.current = false;
@@ -90,6 +97,45 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       }
     };
   }, [current, setSongIndex]);
+  useEffect(() => {isRepeatingRef.current = isRepeating;}, [isRepeating]);
+  useEffect(() => {isShufflingRef.current = isShuffling;}, [isShuffling]);
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+    setAudioBlob(null);
+    const url = Array.isArray(current.src) ? current.src[0] : current.src;
+    if (!url) return;
+    fetch(url, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to fetch audio: ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {if (isMounted) setAudioBlob(blob);})
+      .catch((err) => {
+        if (err.name !== 'AbortError') console.warn('Audio blob fetch error:', err);
+      });
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [current]);
+
+  useEffect(() => {
+    const el = waveformRef.current || playerRef.current;
+    if (!el) return;
+    const compute = () => setVizWidth(Math.max(1, Math.floor(el.clientWidth)));
+    compute();
+    const ro = new ResizeObserver(() => compute());
+    ro.observe(el);
+    window.addEventListener('resize', compute);
+    window.addEventListener('orientationchange', compute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', compute);
+      window.removeEventListener('orientationchange', compute);
+    };
+  }, [audioBlob]);
+
   useEffect(() => {
     if (!soundRef.current) return;
     let interval;
@@ -99,7 +145,6 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         const seek = soundRef.current.seek();
         const duration = soundRef.current.duration();
         if (typeof seek === 'number' && duration > 0) {
-          setProgress((seek / duration) * 100);
           setElapsed(Math.floor(seek));
           if (onSongTimeUpdate) onSongTimeUpdate({ title: current.title, elapsed: Math.floor(seek) });
         }
@@ -122,12 +167,6 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
     return () => clearInterval(interval);
   }, [isPlaying, onSongTimeUpdate, current.title]);
 
-  const nextSong = useCallback(() => {
-    setSongIndex((prev) => {
-      return (prev + 1) % SongConfig.length;
-    });
-  }, [setSongIndex]);
-
   const togglePlayPause = async () => {
     await unlockAudio();
     
@@ -141,19 +180,46 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         }
       }
       setIsPlaying(true);
+      setShowUnlockOverlay(false);
     } else {
       setIsPlaying(false);
     }
   };
+  useEffect(() => {
+    const t = setTimeout(() => setShowUnlockOverlay(true), 1000);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
-    <div className="song-player" onClick={unlockAudio}>
+    <div ref={playerRef} className="song-player" onClick={unlockAudio}>
       <h3 className="title-artist">
         {current.title} – {current.artist || 'Cawayri'}
       </h3>
-      <div className="progress-bar">
-        <div className="progress" style={{ width: `${progress}%` }} />
-      </div>
+      {audioBlob && (
+        <div className="waveform" ref={waveformRef}>
+          <div className="waveform-header">
+          </div>
+          <div className={`waveform-overlay ${showUnlockOverlay && !isPlaying ? 'overlay-visible' : 'overlay-hidden'}`}
+            onClick={(e) => {e.stopPropagation(); unlockAudio();}}>
+            <span>Click ▶️ to enable audio</span>
+          </div>
+          <small className="elapsed-time" aria-label="elapsed">
+            {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
+          </small>
+          <AudioVisualizer
+            className="waveform-visualizer"
+            blob={audioBlob}
+            width={vizWidth}
+            height={56}
+            barWidth={2}
+            gap={1}
+            backgroundColor={'transparent'}
+            barColor={'rgba(250,235,215,0.25)'}
+            barPlayedColor={'#ffffff'}
+            currentTime={elapsed}
+          />
+        </div>
+      )}
       <MarqueeText text={current.scrollText} />
       <div className="player-controls">
         <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
@@ -168,11 +234,6 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
           onClick={() => setIsShuffling(!isShuffling)}
           title="Shuffle"><ShuffleIcon /></button>
       </div>
-      {!audioUnlocked && (
-        <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.5rem' }}>
-          Click to enable audio
-        </div>
-      )}
     </div>
   );
 }

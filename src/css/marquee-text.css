@@ -1,6 +1,6 @@
 .marquee-container {
   position: relative;
-  top: 5px;
+  top: 0;
   overflow: hidden;
   white-space: nowrap;
   font-size: 0.8em;

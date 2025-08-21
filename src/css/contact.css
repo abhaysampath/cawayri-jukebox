@@ -36,7 +36,7 @@
   bottom: 0;
   margin: 15px;
   border-radius: 12px;
-  color: white;
+  color: antiquewhite;
   cursor: pointer;
 }
 
@@ -59,10 +59,10 @@
   }
 }
 .contact-submit-btn button:hover {
-  background: rgba(255,255,255,0.4);
+  background: rgba(250, 235, 215, 0.4);
 }
 .contact-submit-btn button:active {
-  background: rgba(255,255,255,0.6);
+  background: rgba(250, 235, 215, 0.6);
   transform: scale(0.95);
 }
 

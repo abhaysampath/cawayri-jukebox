@@ -3,7 +3,7 @@ body, html {
   padding: 0;
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: white;
+  color: antiquewhite;
   background: linear-gradient(135deg, #7d8dac, #a99d90);
   opacity: 0.95;
   transition: opacity 0.3s ease-in-out;
@@ -40,7 +40,7 @@ body, html {
   z-index: 1;
   width: 100%;
   height: 100%;
-  color: white;
+  color: antiquewhite;
   display: flex;
   flex-direction: column;
   align-items: center;
