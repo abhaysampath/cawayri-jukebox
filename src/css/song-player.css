@@ -14,6 +14,7 @@
   /* Box styling */
   border: 2.4px solid rgba(250, 235, 215, 0.12);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border-radius: 40px;
 }
 .song-player .title-artist {
   font-size: 1.1em;
@@ -40,7 +41,7 @@
   opacity: 0.9;
   position: absolute;
   bottom: 22px;
-  right: 12px;
+  right: 15px;
   color: rgba(250, 235, 215, 0.64);
 }
 .waveform-overlay {
@@ -60,12 +61,12 @@
 .waveform-overlay.overlay-hidden { opacity: 0; pointer-events: none; }
 .control-btn {
   background: rgba(250, 235, 215, 0.2);
-  color: rgba(252, 245, 230, 0.9);
+  color: rgba(252, 245, 230, 0.65);
   padding: 5px 0 0 0;
-  border: 2px double rgba(250, 235, 215, 0.60);
-  border-radius: 50%;
-  width: 56px;
-  height: 56px;
+  border: 3.2px double rgba(250, 235, 215, 0.27);
+  border-radius: 40%;
+  width: 52px;
+  height: 52px;
   font-size: 1.4rem;
   cursor: pointer;
   transition: background 0.8s ease, transform 0.5s ease;
@@ -83,6 +84,7 @@
   width: 80px;
   height: 80px;
   font-size: 2rem;
+  border: 4.2px double rgba(250, 235, 215, 0.32);
 }
 .icon-btn {
   background: none;
@@ -130,7 +132,10 @@ button[title]:hover::after {
   .song-player {
     bottom: 8%;
     padding: 12px;
-    border-radius: 40px;
+  }
+
+  .elapsed-time {
+    right: 12px;
   }
 
   .control-btn {
