@@ -20,8 +20,10 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const soundRef = useRef(null);
   const playerRef = useRef(null);
   const waveformRef = useRef(null);
+  const hitareaRef = useRef(null);
   const isRepeatingRef = useRef(false);
   const isShufflingRef = useRef(false);
+  const isScrubbingRef = useRef(false);
   const current = SongConfig[songIndex];
 
   const unlockAudio = async () => {
@@ -190,6 +192,74 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
     return () => clearTimeout(t);
   }, []);
 
+  const seekFromClientX = (clientX) => {
+    const el = hitareaRef.current || waveformRef.current;
+    const snd = soundRef.current;
+    if (!el || !snd) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const duration = snd.duration();
+    if (!duration || !isFinite(duration)) return;
+    const t = ratio * duration;
+    try {
+      snd.seek(t);
+      setElapsed(Math.floor(t));
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const onMouseMove = (e) => {
+    if (!isScrubbingRef.current) return;
+    e.preventDefault();
+    seekFromClientX(e.clientX);
+  };
+  const onMouseUp = () => {
+    if (!isScrubbingRef.current) return;
+    isScrubbingRef.current = false;
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+  };
+  const onMouseDown = (e) => {
+    unlockAudio();
+    isScrubbingRef.current = true;
+    seekFromClientX(e.clientX);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+  const onTouchMove = (e) => {
+    if (!isScrubbingRef.current) return;
+    const touch = e.touches && e.touches[0];
+    if (!touch) return;
+    seekFromClientX(touch.clientX);
+  };
+  const onTouchEnd = () => {
+    if (!isScrubbingRef.current) return;
+    isScrubbingRef.current = false;
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onTouchEnd);
+    window.removeEventListener('touchcancel', onTouchEnd);
+  };
+  const onTouchStart = (e) => {
+    unlockAudio();
+    isScrubbingRef.current = true;
+    const touch = e.touches && e.touches[0];
+    if (touch) seekFromClientX(touch.clientX);
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchcancel', onTouchEnd);
+  };
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, []);
+
   return (
     <div ref={playerRef} className="song-player" onClick={unlockAudio}>
       <h3 className="title-artist">
@@ -206,18 +276,25 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
           <small className="elapsed-time" aria-label="elapsed">
             {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
           </small>
-          <AudioVisualizer
-            className="waveform-visualizer"
-            blob={audioBlob}
-            width={vizWidth}
-            height={56}
-            barWidth={2}
-            gap={1}
-            backgroundColor={'transparent'}
-            barColor={'rgba(250,235,215,0.25)'}
-            barPlayedColor={'#ffffff'}
-            currentTime={elapsed}
-          />
+          <div
+            className="waveform-hitarea"
+            ref={hitareaRef}
+            onMouseDown={onMouseDown}
+            onTouchStart={onTouchStart}
+          >
+            <AudioVisualizer
+              className="waveform-visualizer"
+              blob={audioBlob}
+              width={vizWidth}
+              height={56}
+              barWidth={2}
+              gap={1}
+              backgroundColor={'transparent'}
+              barColor={'rgba(250,235,215,0.25)'}
+              barPlayedColor={'#ffffff'}
+              currentTime={elapsed}
+            />
+          </div>
         </div>
       )}
       <MarqueeText text={current.scrollText} />

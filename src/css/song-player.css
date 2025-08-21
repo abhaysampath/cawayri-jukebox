@@ -37,6 +37,11 @@
   width: 100%;
   position: relative;
 }
+.waveform-hitarea {
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 .elapsed-time {
   opacity: 0.9;
   position: absolute;
