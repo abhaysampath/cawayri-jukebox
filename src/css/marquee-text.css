@@ -1,28 +1,22 @@
 .marquee-container {
   position: relative;
-  top: 0;
   overflow: hidden;
   white-space: nowrap;
   font-size: 0.8em;
-  opacity: 0.6;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  transform-origin: 50% 50%;
+  border-radius: 10px;
+  /* animation: reveal-scale-fade 360ms ease-out both; */
+  animation: reveal-scale-fade 720ms ease-out 1400ms both;
+  opacity: 0.5;
 }
 
 .marquee {
   display: inline-block;
-  animation: fadeIn 3s ease-in forwards, scroll-left 57s linear infinite;
+  animation: scroll-left 77s linear infinite;
 }
 
 .marquee span {
+  padding-left: 4px;
   padding-right: 50px;
-}
-
-@keyframes fadeIn {
-  0% { transform: translateX(0); opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes scroll-left {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
 }

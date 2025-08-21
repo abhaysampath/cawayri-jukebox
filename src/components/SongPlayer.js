@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Howl, Howler } from 'howler';
 import SongConfig from '../config/songConfig';
 import MoodManager from './MoodManager';
-import MarqueeText from './MarqueeText';
-import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
+import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon, DownloadSimpleIcon, ShareIcon, CopySimpleIcon } from '@phosphor-icons/react';
 import { AudioVisualizer } from 'react-audio-visualize';
+import MarqueeText from './MarqueeText';
 import '../css/song-player.css';
 
 export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }) {
@@ -16,6 +16,9 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const [audioBlob, setAudioBlob] = useState(null);
   const [vizWidth, setVizWidth] = useState(0);
   const [showUnlockOverlay, setShowUnlockOverlay] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadFormat, setDownloadFormat] = useState('mp3');
+  const [downloadEmail, setDownloadEmail] = useState('');
 
   const soundRef = useRef(null);
   const playerRef = useRef(null);
@@ -25,8 +28,22 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const isShufflingRef = useRef(false);
   const isScrubbingRef = useRef(false);
   const current = SongConfig[songIndex];
+  const currentSlug = String(current?.title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  const currentURL = (() => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('song', currentSlug);
+      return url.toString();
+    } catch {
+      return window.location.href;
+    }
+  })();
 
-  const unlockAudio = async () => {
+  // Ensure AudioContext is resumed on user gesture (mobile Safari etc.)
+  const unlockAudio = useCallback(async () => {
     if (!audioUnlocked && Howler.ctx) {
       try {
         await Howler.ctx.resume();
@@ -35,7 +52,92 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         console.warn('Failed to unlock audio context:', error);
       }
     }
+  }, [audioUnlocked]);
+  const copyURL = async () => {
+    try {
+      await navigator.clipboard.writeText(currentURL);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = currentURL;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
   };
+  const shareURL = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: current.title, url: currentURL, text: `${current.title} – ${current.artist || 'Cawayri'}` });
+      } catch {}
+    } else {
+      copyURL();
+    }
+  };
+  const openDownloadDialog = () => setShowDownloadModal(true);
+  const closeDownloadDialog = () => setShowDownloadModal(false);
+  const submitDownloadRequest = (e) => {
+    e.preventDefault();
+    // Placeholder flow; backend/mailing-list integration goes elsewhere
+    alert(`We will email a ${downloadFormat.toUpperCase()} download link to ${downloadEmail} after verifying your signup.`);
+    setShowDownloadModal(false);
+    setDownloadEmail('');
+  };
+  const seekFromClientX = useCallback((clientX) => {
+    const el = hitareaRef.current || waveformRef.current;
+    const snd = soundRef.current;
+    if (!el || !snd) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const duration = snd.duration();
+    if (!duration || !isFinite(duration)) return;
+    const t = ratio * duration;
+    try {
+      snd.seek(t);
+      setElapsed(Math.floor(t));
+    } catch {}
+  }, []);
+  const onMouseMove = useCallback((e) => {
+    if (!isScrubbingRef.current) return;
+    e.preventDefault();
+    seekFromClientX(e.clientX);
+  }, [seekFromClientX]);
+  const onMouseUp = useCallback(() => {
+    if (!isScrubbingRef.current) return;
+    isScrubbingRef.current = false;
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+  }, [onMouseMove]);
+  const onMouseDown = useCallback((e) => {
+    unlockAudio();
+    isScrubbingRef.current = true;
+    seekFromClientX(e.clientX);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [onMouseMove, onMouseUp, seekFromClientX, unlockAudio]);
+  const onTouchMove = useCallback((e) => {
+    if (!isScrubbingRef.current) return;
+    const touch = e.touches && e.touches[0];
+    if (!touch) return;
+    seekFromClientX(touch.clientX);
+  }, [seekFromClientX]);
+  const onTouchEnd = useCallback(() => {
+    if (!isScrubbingRef.current) return;
+    isScrubbingRef.current = false;
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onTouchEnd);
+    window.removeEventListener('touchcancel', onTouchEnd);
+  }, [onTouchMove]);
+  const onTouchStart = useCallback((e) => {
+    unlockAudio();
+    isScrubbingRef.current = true;
+    const touch = e.touches && e.touches[0];
+    if (touch) seekFromClientX(touch.clientX);
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd);
+    window.addEventListener('touchcancel', onTouchEnd);
+  }, [onTouchMove, onTouchEnd, seekFromClientX, unlockAudio]);
   const shouldPlayRef = useRef(false);
   const handleNextSong = () => {
     shouldPlayRef.current = isPlaying;
@@ -192,64 +294,6 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
     return () => clearTimeout(t);
   }, []);
 
-  const seekFromClientX = (clientX) => {
-    const el = hitareaRef.current || waveformRef.current;
-    const snd = soundRef.current;
-    if (!el || !snd) return;
-    const rect = el.getBoundingClientRect();
-    if (rect.width <= 0) return;
-    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-    const duration = snd.duration();
-    if (!duration || !isFinite(duration)) return;
-    const t = ratio * duration;
-    try {
-      snd.seek(t);
-      setElapsed(Math.floor(t));
-    } catch (e) {
-      // ignore
-    }
-  };
-
-  const onMouseMove = (e) => {
-    if (!isScrubbingRef.current) return;
-    e.preventDefault();
-    seekFromClientX(e.clientX);
-  };
-  const onMouseUp = () => {
-    if (!isScrubbingRef.current) return;
-    isScrubbingRef.current = false;
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-  };
-  const onMouseDown = (e) => {
-    unlockAudio();
-    isScrubbingRef.current = true;
-    seekFromClientX(e.clientX);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-  };
-  const onTouchMove = (e) => {
-    if (!isScrubbingRef.current) return;
-    const touch = e.touches && e.touches[0];
-    if (!touch) return;
-    seekFromClientX(touch.clientX);
-  };
-  const onTouchEnd = () => {
-    if (!isScrubbingRef.current) return;
-    isScrubbingRef.current = false;
-    window.removeEventListener('touchmove', onTouchMove);
-    window.removeEventListener('touchend', onTouchEnd);
-    window.removeEventListener('touchcancel', onTouchEnd);
-  };
-  const onTouchStart = (e) => {
-    unlockAudio();
-    isScrubbingRef.current = true;
-    const touch = e.touches && e.touches[0];
-    if (touch) seekFromClientX(touch.clientX);
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend', onTouchEnd);
-    window.addEventListener('touchcancel', onTouchEnd);
-  };
   useEffect(() => {
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
@@ -258,7 +302,7 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       window.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('touchcancel', onTouchEnd);
     };
-  }, []);
+  }, [onMouseMove, onMouseUp, onTouchMove, onTouchEnd]);
 
   return (
     <div ref={playerRef} className="song-player" onClick={unlockAudio}>
@@ -271,8 +315,13 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
           </div>
           <div className={`waveform-overlay ${showUnlockOverlay && !isPlaying ? 'overlay-visible' : 'overlay-hidden'}`}
             onClick={(e) => {e.stopPropagation(); unlockAudio();}}>
-            <span>Click ▶️ to enable audio</span>
+            <span>Click ▶ to enable audio</span>
           </div>
+          {isPlaying && !showUnlockOverlay && (
+            <div className="waveform-marquee" aria-hidden="true">
+              <MarqueeText text={current.scrollText} />
+            </div>
+          )}
           <small className="elapsed-time" aria-label="elapsed">
             {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
           </small>
@@ -297,7 +346,6 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
           </div>
         </div>
       )}
-      <MarqueeText text={current.scrollText} />
       <div className="player-controls">
         <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
           onClick={() => setIsRepeating(!isRepeating)}
@@ -311,6 +359,41 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
           onClick={() => setIsShuffling(!isShuffling)}
           title="Shuffle"><ShuffleIcon /></button>
       </div>
+      <div className="share-download">
+        <button className="download-btn" onClick={openDownloadDialog} title="Download">
+          <DownloadSimpleIcon size={18} />
+        </button>
+        <div className="url-box" title={currentURL}>
+          <span className="url-text">{currentURL}</span>
+          <button className="icon-inline" onClick={copyURL} title="Copy URL"><CopySimpleIcon size={16} /></button>
+          <button className="icon-inline" onClick={shareURL} title="Share"><ShareIcon size={16} /></button>
+        </div>
+      </div>
+      {showDownloadModal && (
+        <div className="download-modal" role="dialog" aria-modal="true" onClick={closeDownloadDialog}>
+          <div className="download-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h4>Get this track</h4>
+            <form onSubmit={submitDownloadRequest}>
+              <div className="row">
+                <label>
+                  <input type="radio" name="format" value="mp3" checked={downloadFormat==='mp3'} onChange={() => setDownloadFormat('mp3')} /> MP3
+                </label>
+                <label>
+                  <input type="radio" name="format" value="wav" checked={downloadFormat==='wav'} onChange={() => setDownloadFormat('wav')} /> WAV
+                </label>
+              </div>
+              <div className="row">
+                <input type="email" required placeholder="your@email.com" value={downloadEmail} onChange={(e)=>setDownloadEmail(e.target.value)} />
+              </div>
+              <div className="actions">
+                <button type="button" className="btn-secondary" onClick={closeDownloadDialog}>Cancel</button>
+                <button type="submit" className="btn-primary">Send Link</button>
+              </div>
+              <p className="fineprint">Subscribe to receive the download via email after confirmation.</p>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

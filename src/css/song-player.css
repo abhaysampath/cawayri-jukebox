@@ -3,14 +3,12 @@
   bottom: 12%;
   left: 50%;
   transform: translateX(-50%);
-  padding: 1rem;
-  /* border-radius: 44px; */
   text-align: center;
   width: 81%;
   max-width: 500px;
   z-index: 5;
-  background-color: rgba(250, 235, 215, 0.08);
-  color: rgba(252, 245, 230, 0.9);
+  background-color: rgba(250, 235, 215, 0.07);
+  color: rgba(252, 245, 230, 0.87);
   /* Box styling */
   border: 3.2px double rgba(250, 235, 215, 0.12);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
@@ -20,7 +18,7 @@
   font-size: 1.1em;
   margin: 8px 0;
   font-weight: 500;
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.72);
 }
 
 .player-controls {
@@ -28,14 +26,39 @@
   justify-content: center;
   align-items: center;
   gap: 0.8rem;
-  margin-top: 1.2rem;
+  margin-bottom: 1.2rem;
 }
 
 .waveform-visualizer { width: 100%; display: block; }
 .waveform {
-  margin: 4px;
+  /* Restore top/bottom spacing so overlay/marquee line up visually */
+  margin: 8px 4px;
+  padding: 6px 0;
   width: 100%;
   position: relative;
+  opacity: 75%;
+}
+.waveform-marquee {
+  position: absolute;
+  left: 28px;
+  right: 48px; /* leave room for elapsed time */
+  top: 27px;
+  height: 20px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.4;
+  /* Reveal animation: fade in + open from a flat line at center */
+  transform-origin: 50% 50%;
+  animation: reveal-scale-fade 360ms ease-out both;
+}
+.waveform-marquee-track {
+  display: inline-block;
+  white-space: nowrap;
+  animation: scroll-left 57s linear infinite;
+}
+.waveform-marquee-track span {
+  padding-left: 8px;
+  padding-right: 50px; /* space between loops */
 }
 .waveform-hitarea {
   position: relative;
@@ -45,8 +68,8 @@
 .elapsed-time {
   opacity: 0.9;
   position: absolute;
-  bottom: 22px;
-  right: 15px;
+  bottom: 28px;
+  right: 12px;
   color: rgba(250, 235, 215, 0.64);
 }
 .waveform-overlay {
@@ -64,14 +87,45 @@
 }
 .waveform-overlay.overlay-visible { opacity: 1; }
 .waveform-overlay.overlay-hidden { opacity: 0; pointer-events: none; }
+
+/* Click-to-play text reveal: fade + scale from center line */
+.waveform-overlay span {
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: 50% 50%;
+  transition: opacity 360ms ease, transform 360ms ease;
+}
+.waveform-overlay.overlay-visible span {
+  opacity: .75;
+  transform: scaleY(1);
+}
+
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+/* Generic reveal used by marquee and waveform: fade + open from a thin center line */
+@keyframes reveal-scale-fade {
+  from { opacity: 0; transform: scaleY(.1); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+/* Waveform canvas reveal on load */
+.waveform-visualizer {
+  will-change: opacity, transform;
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: 50% 50%;
+  animation: reveal-scale-fade 420ms ease-out 400ms forwards;
+}
 .control-btn {
   background: rgba(250, 235, 215, 0.2);
   color: rgba(252, 245, 230, 0.65);
   padding: 5px 0 0 0;
   border: 2.7px double rgba(250, 235, 215, 0.27);
   border-radius: 40%;
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   font-size: 1.4rem;
   cursor: pointer;
   transition: background 0.8s ease, transform 0.5s ease;
@@ -132,6 +186,83 @@ button[title]:hover::after {
   z-index: 999;
 }
 
+.share-download {
+  margin-top: 15px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 5px;
+  border-radius: 8px;
+  border: 1px solid rgba(250,235,215,0.25);
+  background: rgba(250,235,215,0.12);
+  color: rgba(252, 245, 230, 0.85);
+}
+.url-box {
+  min-width: 0;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 2px double rgba(250,235,215,0.2);
+  background: rgba(250,235,215,0.12);
+}
+.url-text {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(252, 245, 230, 0.6);
+}
+.icon-inline {
+  background: transparent;
+  border: none;
+  color: rgba(252, 245, 230, 0.85);
+  cursor: pointer;
+}
+.download-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.download-modal-content {
+  width: min(92vw, 420px);
+  background: rgba(20,20,20,0.95);
+  color: rgba(252,245,230,0.95);
+  border: 1px solid rgba(250,235,215,0.25);
+  border-radius: 12px;
+  padding: 16px;
+}
+.download-modal-content .row { margin: 10px 0; display: flex; gap: 12px; }
+.download-modal-content input[type="email"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(250,235,215,0.25);
+  background: rgba(250,235,215,0.08);
+  color: rgba(252,245,230,0.95);
+}
+.download-modal-content .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.btn-primary, .btn-secondary {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(250,235,215,0.25);
+  background: rgba(250,235,215,0.12);
+  color: rgba(252,245,230,0.95);
+}
+.btn-secondary { opacity: 0.8; }
+.fineprint { opacity: 0.65; font-size: 0.8rem; margin-top: 8px; }
 
 @media (max-width: 600px) {
   .song-player {
@@ -154,4 +285,5 @@ button[title]:hover::after {
     height: 64px;
     font-size: 1.6rem;
   }
+  .url-box { max-width: 100%; }
 }
