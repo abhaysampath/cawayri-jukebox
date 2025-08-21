@@ -4,14 +4,15 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 1rem;
-  border-radius: 44px;
+  /* border-radius: 44px; */
   text-align: center;
-  width: 80%;
+  width: 81%;
   max-width: 500px;
   z-index: 5;
-
+  background-color: rgba(250, 235, 215, 0.08);
+  color: rgba(252, 245, 230, 0.9);
   /* Box styling */
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2.4px solid rgba(250, 235, 215, 0.12);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 .song-player .title-artist {
@@ -19,12 +20,6 @@
   margin: 8px 0;
   font-weight: 500;
   text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
-}
-
-.progress-bar .progress {
-  background-color: #fff;
-  height: 100%;
-  transition: width 0.2s linear;
 }
 
 .player-controls {
@@ -35,24 +30,39 @@
   margin-top: 1.2rem;
 }
 
-.progress-bar {
-  margin: 12px auto;
+.waveform-visualizer { width: 100%; display: block; }
+.waveform {
+  margin: 4px;
   width: 100%;
-  height: 8px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  overflow: hidden;
+  position: relative;
 }
-.progress-bar .progress {
-  height: 100%;
-  background-color: #fff;
-  transition: width 0.2s linear;
+.elapsed-time {
+  opacity: 0.9;
+  position: absolute;
+  bottom: 22px;
+  right: 12px;
+  color: rgba(250, 235, 215, 0.64);
 }
+.waveform-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(250, 235, 215, 0.75);
+  font-size: 0.9rem;
+  border-radius: 6px;
+  pointer-events: auto;
+  opacity: 0.3;
+  transition: opacity 250ms ease;
+}
+.waveform-overlay.overlay-visible { opacity: 1; }
+.waveform-overlay.overlay-hidden { opacity: 0; pointer-events: none; }
 .control-btn {
-  background: rgba(255,255,255,0.2);
-  color: white;
+  background: rgba(250, 235, 215, 0.2);
+  color: rgba(252, 245, 230, 0.9);
   padding: 5px 0 0 0;
-  border: 2px double rgba(255, 255, 255, 0.60);
+  border: 2px double rgba(250, 235, 215, 0.60);
   border-radius: 50%;
   width: 56px;
   height: 56px;
@@ -66,7 +76,7 @@
   background: linear-gradient(135deg, #6c3d28ab, #3b341aab);
 }
 .control-btn:active {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(250, 235, 215,  0.1);
   transform: scale(0.95);
 }
 .play-btn {
@@ -79,7 +89,7 @@
   border: none;
   cursor: pointer;
   font-size: 1.4em;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(250, 235, 215,  0.4);
   transition: color 0.2s ease, opacity 0.2s ease;
 }
 
@@ -106,7 +116,7 @@ button[title]:hover::after {
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.75);
-  color: #fff;
+  color: rgba(253, 245, 230, 0.9);
   padding: 4px 8px;
   font-size: 0.8em;
   white-space: nowrap;

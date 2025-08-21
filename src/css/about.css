@@ -14,7 +14,7 @@
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0,0,0,0.7);
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(250, 235, 215,  0.5);
   border-radius: 27px;
   padding: 18px;
   width: 80%;
@@ -36,7 +36,7 @@
 .about-header .close-btn, .contact-header .close-btn {
   background: none;
   border: none;
-  color: white;
+  color: rgba(252, 245, 230, 0.9);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
@@ -69,7 +69,7 @@
   border-radius: 6px;
   width: 100%;
   box-sizing: border-box;
-  color: rgba(200, 200, 200, 0.65);
+  color: rgba(250, 235, 215, 0.65);
 }
 
 .gallery-scroll {

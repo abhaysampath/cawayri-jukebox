@@ -1,7 +1,7 @@
 .header {
-  margin-top: 3rem;
+  margin-top: 2.22rem;
   text-align: center;
-  color: white;
+  color: rgba(253, 245, 230, 0.85);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 
   .menu-bar {
@@ -19,7 +19,7 @@
       opacity: 1;
     }
     > .menu-item.dimmed {
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(250, 235, 215,  0.6);
       transform: scale(1);
       transition: color 0.3s, transform 0.3s;
     }
