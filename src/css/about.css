@@ -10,20 +10,20 @@
 }
 .about-window, .contact-form {
   position: fixed;
-  top: 175px;
+  top: 150px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0,0,0,0.7);
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 27px;
-  padding: 16px;
+  padding: 18px;
   width: 80%;
   max-width: 550px;
   z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  bottom: calc(100vh*0.12 + 250px);
+  bottom: calc(10vh + 250px);
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
   margin: 40px 0;
   animation: slideDown 0.4s ease forwards;
@@ -59,16 +59,14 @@
   to { transform: translate(-50%, 0); opacity: 1; }
 }
 
-.about-body, .contact-body {
+.about-body { /*, .contact-body {*/
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  /* padding: 0.24rem 8px; */
   overflow-y: scroll;
   overflow-x: hidden;
   border: none;
   border-radius: 6px;
-  /* margin-bottom: 0.5rem; */
   width: 100%;
   box-sizing: border-box;
   color: rgba(200, 200, 200, 0.65);
@@ -231,7 +229,7 @@
 @media (max-width: 600px), (max-height: 1025px) {
   .about-window, .contact-form {
     top: 12px;
-    bottom: calc(100vh*0.1 + 32px);
+    bottom: calc(12vh);
     width: 80%;
     overflow-y: scroll;
     overflow-x: hidden;

@@ -2,10 +2,12 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  padding-bottom: 108px;
+  overflow-y: hidden;
 }
 .contact-body textarea {
   flex-grow: 1;
-  min-height: calc(100vh - 500px);
+  height: max(calc(89vh - 370px), 40px);
   resize: vertical;
 }
 
@@ -15,7 +17,6 @@
   border: none;
   border-radius: 8px;
   margin: 0.35rem 0;
-  max-height: 600px;
   width: 100%;
   box-sizing: border-box;
   color: rgba(29, 27, 27, 0.8);
@@ -45,7 +46,8 @@
   align-items: left;
   position: absolute;
   bottom: 64px;
-  font: 10pt sans-serif;
+  color: rgba(120,120,120,0.98);
+  font-size: .9rem;
   > .mailing-list-checkbox {
     margin-right: 8px;
     width: 16px;
@@ -53,8 +55,6 @@
     cursor: pointer;
   }
   > .mailing-list-label {
-    font-size: .9rem;
-    color: rgba(255,255,255,0.7);
     padding: 5px 0;
   }
 }
@@ -64,4 +64,10 @@
 .contact-submit-btn button:active {
   background: rgba(255,255,255,0.6);
   transform: scale(0.95);
+}
+
+@media (max-height: 450px) {
+  .contact-body {
+    overflow-y: scroll;
+  }
 }
