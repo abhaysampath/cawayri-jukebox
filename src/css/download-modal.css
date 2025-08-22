@@ -1,0 +1,89 @@
+.download-modal-window {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  border: 2px solid rgba(250, 235, 215,  0.5);
+  border-radius: 27px;
+  padding: 18px;
+  width: 80%;
+  max-width: 550px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: max(calc(72vh - 120px), 320px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  margin: 40px 0;
+  animation: slideDown 0.4s ease forwards;
+}
+.download-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.download-header .close-btn {
+  background: none;
+  border: none;
+  color: rgba(252, 245, 230, 0.9);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.download-header .close-btn:hover { opacity: 1; }
+.download-header h2 { margin: 8px 0; font-size: 1.5rem; color: rgba(220,220,220,0.85); }
+
+.download-body { color: rgba(250,235,215,0.8); .format-label { color: rgba(180,180,180,0.9); padding-bottom: 1px; font-size: 0.9rem; } }
+.download-body .meta { margin-bottom: 8px; }
+.download-body .meta .title { font-weight: 600; }
+.download-body .meta .info { opacity: 0.8; font-size: 0.9rem; }
+.download-body form input[type="email"] {
+  width: 94%; padding: 8px; border-radius: 8px; border: 1px solid rgba(250,235,215,0.25); margin: 8px 0; background: rgba(250,235,215,0.12); color: rgba(252,245,230,0.95);
+}
+.download-body .row {
+  display: inline-flex; 
+  gap: 2px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.download-btn {
+  background: #fb8f61;
+  padding: 0.75rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 15px;
+  border: 2.7px double rgba(250, 235, 215, 0.27);
+  border-radius: 12px;
+  color: antiquewhite;
+  cursor: pointer;
+}
+.download-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.download-btn button:hover {
+  background: rgba(250, 235, 215, 0.4);
+}
+.download-btn button:active {
+  background: rgba(250, 235, 215, 0.6);
+  transform: scale(0.95);
+}
+.download-body .mailing-list-checkbox { margin-right: 5px; margin-top: 5px; width: 16px; }
+.download-body .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.download-body .btn-primary, .download-body .btn-secondary {
+  padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(250,235,215,0.25); background: rgba(250,235,215,0.12); color: rgba(252,245,230,0.95);
+}
+
+.download-body .share-inline { margin-top: 20px; display: flex; flex-direction: column; gap: 6px; }
+.download-body .share-inline .url-box.readonly { display: flex; gap: 8px; align-items: center; border: 2px double rgba(250,235,215,0.2); border-radius: 8px; padding: 6px; background: rgba(250,235,215,0.12); }
+.download-body .share-inline .url-box.readonly input { background: transparent; color: rgba(252,245,230,0.9); border: none; width: 100%; font-size: 0.85rem; }
+.download-body .share-inline .icon-inline { background: rgba(250,235,215,0.15); border: 1px solid rgba(250,235,215,0.25); border-radius: 6px; color: rgba(252,245,230,0.9); display: inline-flex; align-items: center; justify-content: center; padding: 4px 6px; cursor: pointer; }
+.download-body .share-inline .icon-inline:hover { background: rgba(250,235,215,0.25); }
+
+@media (max-width: 600px), (max-height: 1025px) {
+  .download-modal-window { top: 60px; width: 80%; overflow-y: scroll;
+    /* bottom: calc(15vh); */
+  }
+}

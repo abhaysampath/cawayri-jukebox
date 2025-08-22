@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Howl, Howler } from 'howler';
 import SongConfig from '../config/songConfig';
 import MoodManager from './MoodManager';
-import MarqueeText from './MarqueeText';
-import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon } from '@phosphor-icons/react';
+import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, RepeatIcon, DownloadSimpleIcon, ShareIcon, CopySimpleIcon } from '@phosphor-icons/react';
 import { AudioVisualizer } from 'react-audio-visualize';
+import MarqueeText from './MarqueeText';
+import useScrubSeek from '../hooks/useScrubSeek';
 import '../css/song-player.css';
+import '../css/modal.css';
+import '../css/download-modal.css';
 
 export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -16,6 +19,10 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const [audioBlob, setAudioBlob] = useState(null);
   const [vizWidth, setVizWidth] = useState(0);
   const [showUnlockOverlay, setShowUnlockOverlay] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadFormat, setDownloadFormat] = useState('mp3');
+  const [downloadEmail, setDownloadEmail] = useState('');
+  const [subscribe, setSubscribe] = useState(true);
 
   const soundRef = useRef(null);
   const playerRef = useRef(null);
@@ -23,10 +30,22 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const hitareaRef = useRef(null);
   const isRepeatingRef = useRef(false);
   const isShufflingRef = useRef(false);
-  const isScrubbingRef = useRef(false);
   const current = SongConfig[songIndex];
+  const currentSlug = String(current?.title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  const currentURL = (() => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('song', currentSlug);
+      return url.toString();
+    } catch {
+      return window.location.href;
+    }
+  })();
 
-  const unlockAudio = async () => {
+  const unlockAudio = useCallback(async () => {
     if (!audioUnlocked && Howler.ctx) {
       try {
         await Howler.ctx.resume();
@@ -35,7 +54,37 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
         console.warn('Failed to unlock audio context:', error);
       }
     }
+  }, [audioUnlocked]);
+  const copyURL = async () => {
+    try {
+      await navigator.clipboard.writeText(currentURL);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = currentURL;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
   };
+  const shareURL = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: current.title, url: currentURL, text: `${current.title} – ${current.artist || 'Cawayri'}` });
+      } catch {}
+    } else {
+      copyURL();
+    }
+  };
+  const closeDownloadDialog = () => setShowDownloadModal(false);
+  const submitDownloadRequest = (e) => {
+    e.preventDefault();
+    // Placeholder flow; backend/mailing-list integration goes elsewhere
+    alert(`We will email a ${downloadFormat.toUpperCase()} download link to ${downloadEmail} after verifying your signup.`);
+    setShowDownloadModal(false);
+    setDownloadEmail('');
+  };
+  const { onMouseDown, onTouchStart } = useScrubSeek({ hitareaRef, waveformRef, soundRef, setElapsed, unlockAudio });
   const shouldPlayRef = useRef(false);
   const handleNextSong = () => {
     shouldPlayRef.current = isPlaying;
@@ -192,124 +241,105 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
     return () => clearTimeout(t);
   }, []);
 
-  const seekFromClientX = (clientX) => {
-    const el = hitareaRef.current || waveformRef.current;
-    const snd = soundRef.current;
-    if (!el || !snd) return;
-    const rect = el.getBoundingClientRect();
-    if (rect.width <= 0) return;
-    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-    const duration = snd.duration();
-    if (!duration || !isFinite(duration)) return;
-    const t = ratio * duration;
-    try {
-      snd.seek(t);
-      setElapsed(Math.floor(t));
-    } catch (e) {
-      // ignore
-    }
-  };
-
-  const onMouseMove = (e) => {
-    if (!isScrubbingRef.current) return;
-    e.preventDefault();
-    seekFromClientX(e.clientX);
-  };
-  const onMouseUp = () => {
-    if (!isScrubbingRef.current) return;
-    isScrubbingRef.current = false;
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-  };
-  const onMouseDown = (e) => {
-    unlockAudio();
-    isScrubbingRef.current = true;
-    seekFromClientX(e.clientX);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-  };
-  const onTouchMove = (e) => {
-    if (!isScrubbingRef.current) return;
-    const touch = e.touches && e.touches[0];
-    if (!touch) return;
-    seekFromClientX(touch.clientX);
-  };
-  const onTouchEnd = () => {
-    if (!isScrubbingRef.current) return;
-    isScrubbingRef.current = false;
-    window.removeEventListener('touchmove', onTouchMove);
-    window.removeEventListener('touchend', onTouchEnd);
-    window.removeEventListener('touchcancel', onTouchEnd);
-  };
-  const onTouchStart = (e) => {
-    unlockAudio();
-    isScrubbingRef.current = true;
-    const touch = e.touches && e.touches[0];
-    if (touch) seekFromClientX(touch.clientX);
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend', onTouchEnd);
-    window.addEventListener('touchcancel', onTouchEnd);
-  };
-  useEffect(() => {
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
-      window.removeEventListener('touchcancel', onTouchEnd);
-    };
-  }, []);
-
   return (
-    <div ref={playerRef} className="song-player" onClick={unlockAudio}>
-      <h3 className="title-artist">
-        {current.title} – {current.artist || 'Cawayri'}
-      </h3>
-      {audioBlob && (
-        <div className="waveform" ref={waveformRef}>
-          <div className="waveform-header">
-          </div>
-          <div className={`waveform-overlay ${showUnlockOverlay && !isPlaying ? 'overlay-visible' : 'overlay-hidden'}`}
-            onClick={(e) => {e.stopPropagation(); unlockAudio();}}>
-            <span>Click ▶️ to enable audio</span>
-          </div>
-          <small className="elapsed-time" aria-label="elapsed">
-            {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
-          </small>
-          <div
-            className="waveform-hitarea"
-            ref={hitareaRef}
-            onMouseDown={onMouseDown}
-            onTouchStart={onTouchStart}
-          >
-            <AudioVisualizer
-              className="waveform-visualizer"
-              blob={audioBlob}
-              width={vizWidth}
-              height={56}
-              barWidth={2}
-              gap={1}
-              backgroundColor={'transparent'}
-              barColor={'rgba(250,235,215,0.25)'}
-              barPlayedColor={'#ffffff'}
-              currentTime={elapsed}
-            />
+    <div>
+      {showDownloadModal && (
+        <div className="modal-overlay" onClick={closeDownloadDialog}>
+          <div className="download-modal-window" onClick={(e)=>e.stopPropagation()}>
+            <div className="download-header">
+              <h2>Get this track</h2>
+              <button className="close-btn" type="button" onClick={closeDownloadDialog}>&times;</button>
+            </div>
+            <div className="download-body">
+              <div className="meta">
+                <div className="title">{current.title} – {current.artist || 'Cawayri'}</div>
+                <div className="info">Size: {audioBlob ? (Math.max(1, (audioBlob.size / 1024 / 1024)).toFixed(2)) : '—'} MB</div>
+              </div>
+              <form onSubmit={submitDownloadRequest} autoComplete="off">
+                <input type="email" required placeholder="your@email.com" value={downloadEmail} onChange={(e)=>setDownloadEmail(e.target.value)} />
+                <div className="row">
+                  <div className='format-label'><input type="radio" name="format" value="mp3" checked={downloadFormat==='mp3'} onChange={() => setDownloadFormat('mp3')} /> mp3</div>
+                  <div className='format-label'><input type="radio" name="format" value="wav" checked={downloadFormat==='wav'} onChange={() => setDownloadFormat('wav')} /> wav</div>
+                  <div className="mailing-list">
+                    <input className='mailing-list-checkbox' id="dlSubscribe" type="checkbox" checked={subscribe} onChange={(e)=>setSubscribe(e.target.checked)} />
+                    <label className='mailing-list-label' htmlFor="dlSubscribe">Add me to mailing list</label>
+                  </div>
+                </div>
+                <button type="submit" className="download-btn" disabled={!subscribe}>Send Download to E-mail</button>
+              </form>
+              <div className="share-inline">
+                <div className="meta"><div className="title">Share</div></div>
+                <div className="url-box readonly" title={currentURL}>
+                  <input type="text" readOnly value={currentURL} onFocus={(e)=>e.target.select()} />
+                  <button className="icon-inline" onClick={copyURL} title="Copy URL"><CopySimpleIcon size={16} /></button>
+                  <button className="icon-inline" onClick={shareURL} title="Share"><ShareIcon size={16} /></button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
-      <MarqueeText text={current.scrollText} />
-      <div className="player-controls">
-        <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
-          onClick={() => setIsRepeating(!isRepeating)}
-          title="Repeat"><RepeatIcon /></button>
-        <button onClick={handlePrevSong} className="control-btn"><SkipBackIcon /></button>
-        <button onClick={togglePlayPause} className="control-btn play-btn">
-          {isPlaying ? <PauseIcon /> : <PlayIcon />}
-        </button>
-        <button onClick={handleNextSong} className="control-btn"><SkipForwardIcon /></button>
-        <button className={`icon-btn ${isShuffling ? 'active' : ''}`}
-          onClick={() => setIsShuffling(!isShuffling)}
-          title="Shuffle"><ShuffleIcon /></button>
+      
+      <div ref={playerRef} className="song-player" onClick={unlockAudio}>
+        <h3 className="title-artist">
+          {current.title} – {current.artist || 'Cawayri'}
+        </h3>
+        {audioBlob && (
+          <div className="waveform" ref={waveformRef}>
+            <div className="waveform-header">
+            </div>
+            <div className={`waveform-overlay ${showUnlockOverlay && !isPlaying ? 'overlay-visible' : 'overlay-hidden'}`}
+              onClick={(e) => {e.stopPropagation(); unlockAudio();}}>
+              <span>Click ▶ to enable audio</span>
+            </div>
+            {isPlaying && !showUnlockOverlay && (
+              <div className="waveform-marquee" aria-hidden="true">
+                <MarqueeText text={current.scrollText} />
+              </div>
+            )}
+            <small className="elapsed-time" aria-label="elapsed">
+              {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
+            </small>
+            <div
+              className="waveform-hitarea"
+              ref={hitareaRef}
+              onMouseDown={onMouseDown}
+              onTouchStart={onTouchStart}
+            >
+              <AudioVisualizer
+                className="waveform-visualizer"
+                blob={audioBlob}
+                width={vizWidth}
+                height={56}
+                barWidth={2}
+                gap={1}
+                backgroundColor={'transparent'}
+                barColor={'rgba(250,235,215,0.25)'}
+                barPlayedColor={'#ffffff'}
+                currentTime={elapsed}
+              />
+            </div>
+          </div>
+        )}
+        <div className="player-controls">
+          <button onClick={handlePrevSong} className="control-btn"><SkipBackIcon /></button>
+          <button onClick={togglePlayPause} className="control-btn play-btn">
+            {isPlaying ? <PauseIcon /> : <PlayIcon />}
+          </button>
+          <button onClick={handleNextSong} className="control-btn"><SkipForwardIcon /></button>
+        </div>
+        <div className="player-controls secondary-controls">
+          <button className="icon-btn" onClick={() => setShowDownloadModal(true)} title="Download / Share"><DownloadSimpleIcon /></button>
+          <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
+            onClick={() => setIsRepeating(!isRepeating)}
+            title="Repeat"><RepeatIcon />
+          </button>
+          <button className={`icon-btn ${isShuffling ? 'active' : ''}`}
+            onClick={() => setIsShuffling(!isShuffling)}
+            title="Shuffle"><ShuffleIcon />
+          </button>
+          <button className="icon-btn" onClick={shareURL} title="Share"><ShareIcon /></button>
+        </div>
       </div>
     </div>
   );
