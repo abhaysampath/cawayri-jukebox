@@ -22,7 +22,7 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadFormat, setDownloadFormat] = useState('mp3');
   const [downloadEmail, setDownloadEmail] = useState('');
-  const [subscribe, setSubscribe] = useState(false);
+  const [subscribe, setSubscribe] = useState(true);
 
   const soundRef = useRef(null);
   const playerRef = useRef(null);
@@ -258,21 +258,21 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
               <form onSubmit={submitDownloadRequest} autoComplete="off">
                 <input type="email" required placeholder="your@email.com" value={downloadEmail} onChange={(e)=>setDownloadEmail(e.target.value)} />
                 <div className="row">
-                  <label><input type="radio" name="format" value="mp3" checked={downloadFormat==='mp3'} onChange={() => setDownloadFormat('mp3')} /> MP3</label>
-                  <label><input type="radio" name="format" value="wav" checked={downloadFormat==='wav'} onChange={() => setDownloadFormat('wav')} /> WAV</label>
+                  <div className='format-label'><input type="radio" name="format" value="mp3" checked={downloadFormat==='mp3'} onChange={() => setDownloadFormat('mp3')} /> mp3</div>
+                  <div className='format-label'><input type="radio" name="format" value="wav" checked={downloadFormat==='wav'} onChange={() => setDownloadFormat('wav')} /> wav</div>
                   <div className="mailing-list">
                     <input className='mailing-list-checkbox' id="dlSubscribe" type="checkbox" checked={subscribe} onChange={(e)=>setSubscribe(e.target.checked)} />
                     <label className='mailing-list-label' htmlFor="dlSubscribe">Add me to mailing list</label>
                   </div>
                 </div>
-                <button type="submit" className="contact-submit-btn" disabled={!subscribe}>Download</button>
+                <button type="submit" className="download-btn" disabled={!subscribe}>Send Download to E-mail</button>
               </form>
               <div className="share-inline">
                 <div className="meta"><div className="title">Share</div></div>
                 <div className="url-box readonly" title={currentURL}>
                   <input type="text" readOnly value={currentURL} onFocus={(e)=>e.target.select()} />
                   <button className="icon-inline" onClick={copyURL} title="Copy URL"><CopySimpleIcon size={16} /></button>
-                  <button className="icon-inline" onClick={shareURL} title="System Share"><ShareIcon size={16} /></button>
+                  <button className="icon-inline" onClick={shareURL} title="Share"><ShareIcon size={16} /></button>
                 </div>
               </div>
             </div>
@@ -322,21 +322,23 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
           </div>
         )}
         <div className="player-controls">
-          <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
-            onClick={() => setIsRepeating(!isRepeating)}
-            title="Repeat"><RepeatIcon /></button>
           <button onClick={handlePrevSong} className="control-btn"><SkipBackIcon /></button>
           <button onClick={togglePlayPause} className="control-btn play-btn">
             {isPlaying ? <PauseIcon /> : <PlayIcon />}
           </button>
           <button onClick={handleNextSong} className="control-btn"><SkipForwardIcon /></button>
-          <button className={`icon-btn ${isShuffling ? 'active' : ''}`}
-            onClick={() => setIsShuffling(!isShuffling)}
-            title="Shuffle"><ShuffleIcon /></button>
         </div>
         <div className="player-controls secondary-controls">
           <button className="icon-btn" onClick={() => setShowDownloadModal(true)} title="Download / Share"><DownloadSimpleIcon /></button>
-          <button className="icon-btn" onClick={shareURL} title="System Share"><ShareIcon /></button>
+          <button className={`icon-btn ${isRepeating ? 'active' : ''}`}
+            onClick={() => setIsRepeating(!isRepeating)}
+            title="Repeat"><RepeatIcon />
+          </button>
+          <button className={`icon-btn ${isShuffling ? 'active' : ''}`}
+            onClick={() => setIsShuffling(!isShuffling)}
+            title="Shuffle"><ShuffleIcon />
+          </button>
+          <button className="icon-btn" onClick={shareURL} title="Share"><ShareIcon /></button>
         </div>
       </div>
     </div>

@@ -25,16 +25,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.7rem;
-  > .icon-btn {padding: 0;}
+  gap: 1.2rem;
+  margin: 0.35rem 0;
 }
 .secondary-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 3.6rem;
-  margin-top: 3px;
-  margin-bottom: 1.2rem;
+  gap: 1.2rem;
+  padding-top: 12px
 }
 
 .waveform-visualizer { width: 100%; display: block; }
