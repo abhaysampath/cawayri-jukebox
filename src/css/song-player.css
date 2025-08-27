@@ -44,6 +44,11 @@
   width: 100%;
   position: relative;
   opacity: 75%;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  caret-color: transparent;
 }
 .waveform-marquee {
   position: absolute;
@@ -71,6 +76,11 @@
   position: relative;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  caret-color: transparent;
 }
 .elapsed-time {
   opacity: 0.9;
@@ -91,6 +101,11 @@
   pointer-events: auto;
   opacity: 0.3;
   transition: opacity 250ms ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  caret-color: transparent;
 }
 .waveform-overlay.overlay-visible { opacity: 1; }
 .waveform-overlay.overlay-hidden { opacity: 0; pointer-events: none; }
