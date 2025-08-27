@@ -5,6 +5,7 @@ export default function VideoBackground() {
   const videoRef = useRef(null);
   const preloadRef = useRef(null);
   const [stepIndex, setStepIndex] = useState(1);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
   const pickVideoForOrder = (order) => {
     const candidates = videoConfig.filter(v => v.order === order);
@@ -17,6 +18,30 @@ export default function VideoBackground() {
     const holds = videoConfig.filter(v => v.order === "HOLD");
     return holds[Math.floor(Math.random() * holds.length)];
   };
+
+  // Handle user interaction to enable autoplay
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setHasUserInteracted(true);
+      // Retry video play if it previously failed
+      const video = videoRef.current;
+      if (video && video.paused && video.readyState >= 2) {
+        video.play().catch(err => console.warn("Retry play failed:", err));
+      }
+    };
+
+    // Listen for any user interaction
+    const events = ['click', 'touchstart', 'keydown'];
+    events.forEach(event => {
+      document.addEventListener(event, handleUserInteraction, { once: true });
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleUserInteraction);
+      });
+    };
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -39,7 +64,32 @@ export default function VideoBackground() {
     video.loop = false;
 
     const handleLoaded = () => {
-      video.play().catch((err) => console.warn("Play blocked:", err));
+      // Use a more robust approach to ensure video is ready to play
+      const tryPlay = async () => {
+        try {
+          // Wait a bit to ensure video is fully ready
+          await new Promise(resolve => setTimeout(resolve, 100));
+          await video.play();
+        } catch (err) {
+          console.warn("Play blocked:", err);
+          // If play fails and we don't have user interaction yet, wait for it
+          if (!hasUserInteracted) {
+            console.log("Waiting for user interaction to enable video autoplay");
+          }
+        }
+      };
+      
+      // Only try to play if video has enough data buffered
+      if (video.readyState >= 3) { // HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA
+        tryPlay();
+      } else {
+        // Wait for more data to be loaded
+        const onCanPlay = () => {
+          video.removeEventListener('canplay', onCanPlay);
+          tryPlay();
+        };
+        video.addEventListener('canplay', onCanPlay);
+      }
     };
 
     let repeatCounter = 0;
@@ -52,7 +102,8 @@ export default function VideoBackground() {
         } else {
           video.currentTime = currentConfig.startTime || 0;
         }
-        video.play();
+        // Add retry logic for repeated play attempts
+        video.play().catch(err => console.warn("Repeat play failed:", err));
       } else {
         setStepIndex(prev => prev + 1);
       }
@@ -60,6 +111,14 @@ export default function VideoBackground() {
 
     video.addEventListener("loadeddata", handleLoaded);
     video.addEventListener("ended", handleEnd);
+
+    // Also add error handling for video loading issues
+    const handleError = (e) => {
+      console.warn("Video error:", e);
+      // Try to recover by moving to next video
+      setTimeout(() => setStepIndex(prev => prev + 1), 1000);
+    };
+    video.addEventListener("error", handleError);
 
     if (preloadRef.current) {
       let nextConfig;
@@ -77,8 +136,9 @@ export default function VideoBackground() {
     return () => {
       video.removeEventListener("loadeddata", handleLoaded);
       video.removeEventListener("ended", handleEnd);
+      video.removeEventListener("error", handleError);
     };
-  }, [stepIndex]);
+  }, [stepIndex, hasUserInteracted]);
 
   return (
     <>
