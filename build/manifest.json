@@ -1,0 +1,20 @@
+{
+  "short_name": "Cawayri",
+  "name": "Cawayri Jukebox",
+  "description": "Cawayri Jukebox – Brooklyn-based electronic music, Bollywood, dreamy textures, and 90s R&B. Listen, connect, and explore.",
+  "icons": [
+    {
+      "src": "photos/dj3.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1a1a1a",
+  "background_color": "#181818",
+  "orientation": "portrait",
+  "scope": ".",
+  "lang": "en",
+  "dir": "ltr"
+}
