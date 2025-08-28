@@ -38,22 +38,22 @@
 
 .waveform-visualizer { width: 100%; display: block; }
 .waveform {
-  /* Restore top/bottom spacing so overlay/marquee line up visually */
   margin: 8px 4px;
-  padding: 6px 0;
-  width: 100%;
   position: relative;
   opacity: 75%;
+  user-select: none;
+  -moz-user-select: none;
+  caret-color: transparent;
 }
 .waveform-marquee {
   position: absolute;
   left: 28px;
-  right: 48px; /* leave room for elapsed time */
-  top: 27px;
+  right: 48px;
+  top: 20px;
   height: 20px;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0.4;
+  opacity: 0.32;
   /* Reveal animation: fade in + open from a flat line at center */
   transform-origin: 50% 50%;
   animation: reveal-scale-fade 360ms ease-out both;
@@ -65,17 +65,20 @@
 }
 .waveform-marquee-track span {
   padding-left: 8px;
-  padding-right: 50px; /* space between loops */
+  padding-right: 150px; /* space between loops */
 }
 .waveform-hitarea {
   position: relative;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -moz-user-select: none;
+  caret-color: transparent;
 }
 .elapsed-time {
   opacity: 0.9;
   position: absolute;
-  bottom: 28px;
+  top: 20px;
   right: 12px;
   color: rgba(250, 235, 215, 0.64);
 }
@@ -95,12 +98,14 @@
 .waveform-overlay.overlay-visible { opacity: 1; }
 .waveform-overlay.overlay-hidden { opacity: 0; pointer-events: none; }
 
-/* Click-to-play text reveal: fade + scale from center line */
 .waveform-overlay span {
   opacity: 0;
   transform: scaleY(0);
   transform-origin: 50% 50%;
   transition: opacity 360ms ease, transform 360ms ease;
+  user-select: none;
+  -moz-user-select: none;
+  caret-color: transparent;
 }
 .waveform-overlay.overlay-visible span {
   opacity: .75;
