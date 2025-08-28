@@ -7,7 +7,7 @@
 }
 .contact-body textarea {
   flex-grow: 1;
-  height: max(calc(80vh - 370px), 40px);
+  min-height: max(calc(90vh - 480px), 60px);
   resize: vertical;
 }
 
