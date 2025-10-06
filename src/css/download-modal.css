@@ -82,6 +82,43 @@
 .download-body .share-inline .icon-inline { background: rgba(250,235,215,0.15); border: 1px solid rgba(250,235,215,0.25); border-radius: 6px; color: rgba(252,245,230,0.9); display: inline-flex; align-items: center; justify-content: center; padding: 4px 6px; cursor: pointer; }
 .download-body .share-inline .icon-inline:hover { background: rgba(250,235,215,0.25); }
 
+/* Consent note styling */
+.download-body .consent-note {
+  font-size: 0.8rem;
+  color: rgba(252, 245, 230, 0.7);
+  margin: 8px 0;
+  line-height: 1.3;
+}
+
+/* Error message styling */
+.download-body .error-message {
+  background: rgba(255, 77, 77, 0.15);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  border-radius: 6px;
+  color: rgba(255, 120, 120, 0.9);
+  padding: 8px;
+  margin: 8px 0;
+  font-size: 0.9rem;
+}
+
+/* Success view styling */
+.download-body .success-view {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.download-body .success-view .meta .title {
+  color: rgba(120, 255, 120, 0.9);
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.download-body .success-view .meta .info {
+  color: rgba(252, 245, 230, 0.8);
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
 @media (max-width: 600px), (max-height: 1025px) {
   .download-modal-window { top: 60px; width: 80%; overflow-y: scroll;
     /* bottom: calc(15vh); */

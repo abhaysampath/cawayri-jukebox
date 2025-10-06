@@ -6,6 +6,7 @@ import { PlayIcon, PauseIcon, SkipForwardIcon, SkipBackIcon, ShuffleIcon, Repeat
 import { AudioVisualizer } from 'react-audio-visualize';
 import MarqueeText from './MarqueeText';
 import useScrubSeek from '../hooks/useScrubSeek';
+import { subscribeToForm } from '../lib/kit';
 import '../css/song-player.css';
 import '../css/modal.css';
 import '../css/download-modal.css';
@@ -22,7 +23,8 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadFormat, setDownloadFormat] = useState('mp3');
   const [downloadEmail, setDownloadEmail] = useState('');
-  const [subscribe, setSubscribe] = useState(true);
+  const [submitStatus, setSubmitStatus] = useState(null); // null, 'loading', 'success', 'error'
+  const [submitError, setSubmitError] = useState('');
 
   const soundRef = useRef(null);
   const playerRef = useRef(null);
@@ -76,13 +78,31 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
       copyURL();
     }
   };
-  const closeDownloadDialog = () => setShowDownloadModal(false);
-  const submitDownloadRequest = (e) => {
-    e.preventDefault();
-    // Placeholder flow; backend/mailing-list integration goes elsewhere
-    alert(`We will email a ${downloadFormat.toUpperCase()} download link to ${downloadEmail} after verifying your signup.`);
+  const closeDownloadDialog = () => {
     setShowDownloadModal(false);
+    setSubmitStatus(null);
+    setSubmitError('');
     setDownloadEmail('');
+  };
+  
+  const submitDownloadRequest = async (e) => {
+    e.preventDefault();
+    setSubmitStatus('loading');
+    setSubmitError('');
+
+    const result = await subscribeToForm({
+      email: downloadEmail,
+      songSlug: currentSlug,
+      songTitle: current.title,
+      songFormat: downloadFormat
+    });
+
+    if (result.ok) {
+      setSubmitStatus('success');
+    } else {
+      setSubmitStatus('error');
+      setSubmitError(result.error || 'Failed to subscribe. Please try again.');
+    }
   };
   const { onMouseDown, onTouchStart } = useScrubSeek({ hitareaRef, waveformRef, soundRef, setElapsed, unlockAudio });
   const shouldPlayRef = useRef(false);
@@ -251,30 +271,82 @@ export default function SongPlayer({ songIndex, setSongIndex, onSongTimeUpdate }
               <button className="close-btn" type="button" onClick={closeDownloadDialog}>&times;</button>
             </div>
             <div className="download-body">
-              <div className="meta">
-                <div className="title">{current.title} – {current.artist || 'Cawayri'}</div>
-                <div className="info">Size: {audioBlob ? (Math.max(1, (audioBlob.size / 1024 / 1024)).toFixed(2)) : '—'} MB</div>
-              </div>
-              <form onSubmit={submitDownloadRequest} autoComplete="off">
-                <input type="email" required placeholder="your@email.com" value={downloadEmail} onChange={(e)=>setDownloadEmail(e.target.value)} />
-                <div className="row">
-                  <div className='format-label'><input type="radio" name="format" value="mp3" checked={downloadFormat==='mp3'} onChange={() => setDownloadFormat('mp3')} /> mp3</div>
-                  <div className='format-label'><input type="radio" name="format" value="wav" checked={downloadFormat==='wav'} onChange={() => setDownloadFormat('wav')} /> wav</div>
-                  <div className="mailing-list">
-                    <input className='mailing-list-checkbox' id="dlSubscribe" type="checkbox" checked={subscribe} onChange={(e)=>setSubscribe(e.target.checked)} />
-                    <label className='mailing-list-label' htmlFor="dlSubscribe">Add me to mailing list</label>
+              {submitStatus === 'success' ? (
+                <div className="success-view">
+                  <div className="meta">
+                    <div className="title">✓ Success!</div>
+                    <div className="info">
+                      We'll email you a {downloadFormat.toUpperCase()} download link for "{current.title}" shortly. 
+                      Check your inbox and follow the link to get your track.
+                    </div>
                   </div>
+                  <button className="download-btn" onClick={closeDownloadDialog}>
+                    Close
+                  </button>
                 </div>
-                <button type="submit" className="download-btn" disabled={!subscribe}>Send Download to E-mail</button>
-              </form>
-              <div className="share-inline">
-                <div className="meta"><div className="title">Share</div></div>
-                <div className="url-box readonly" title={currentURL}>
-                  <input type="text" readOnly value={currentURL} onFocus={(e)=>e.target.select()} />
-                  <button className="icon-inline" onClick={copyURL} title="Copy URL"><CopySimpleIcon size={16} /></button>
-                  <button className="icon-inline" onClick={shareURL} title="Share"><ShareIcon size={16} /></button>
-                </div>
-              </div>
+              ) : (
+                <>
+                  <div className="meta">
+                    <div className="title">{current.title} – {current.artist || 'Cawayri'}</div>
+                    <div className="info">Size: {audioBlob ? (Math.max(1, (audioBlob.size / 1024 / 1024)).toFixed(2)) : '—'} MB</div>
+                  </div>
+                  <form onSubmit={submitDownloadRequest} autoComplete="off">
+                    <input 
+                      type="email" 
+                      required 
+                      placeholder="your@email.com" 
+                      value={downloadEmail} 
+                      onChange={(e)=>setDownloadEmail(e.target.value)}
+                      disabled={submitStatus === 'loading'} 
+                    />
+                    <div className="row">
+                      <div className='format-label'>
+                        <input 
+                          type="radio" 
+                          name="format" 
+                          value="mp3" 
+                          checked={downloadFormat==='mp3'} 
+                          onChange={() => setDownloadFormat('mp3')}
+                          disabled={submitStatus === 'loading'} 
+                        /> mp3
+                      </div>
+                      <div className='format-label'>
+                        <input 
+                          type="radio" 
+                          name="format" 
+                          value="wav" 
+                          checked={downloadFormat==='wav'} 
+                          onChange={() => setDownloadFormat('wav')}
+                          disabled={submitStatus === 'loading'} 
+                        /> wav
+                      </div>
+                    </div>
+                    <div className="consent-note">
+                      By submitting, you consent to receive emails with your download link and occasional updates about new music.
+                    </div>
+                    {submitStatus === 'error' && (
+                      <div className="error-message">
+                        {submitError}
+                      </div>
+                    )}
+                    <button 
+                      type="submit" 
+                      className="download-btn" 
+                      disabled={submitStatus === 'loading'}
+                    >
+                      {submitStatus === 'loading' ? 'Sending...' : 'Send Download to E-mail'}
+                    </button>
+                  </form>
+                  <div className="share-inline">
+                    <div className="meta"><div className="title">Share</div></div>
+                    <div className="url-box readonly" title={currentURL}>
+                      <input type="text" readOnly value={currentURL} onFocus={(e)=>e.target.select()} />
+                      <button className="icon-inline" onClick={copyURL} title="Copy URL"><CopySimpleIcon size={16} /></button>
+                      <button className="icon-inline" onClick={shareURL} title="Share"><ShareIcon size={16} /></button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
